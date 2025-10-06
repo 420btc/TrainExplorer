@@ -28,12 +28,12 @@ export interface MapSizeConfig {
 // Configuraciones para cada tamaño
 export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
   [MapSize.SMALL]: {
-    maxTrackLength: 5250,    // Reducido 6 veces (31500 / 6)
-    minTrackLength: 3000,    // Reducido 6 veces (18000 / 6)
-    urbanAreaRadius: 6000,   // Reducido 6 veces (36000 / 6)
-    stationsPerTrack: 3,     // Reducido proporcionalmente
-    stationsPerConnection: 2, // Reducido proporcionalmente
-    minStationDistance: 0.2  // Reducido 6 veces (1.2 / 6)
+    maxTrackLength: 1500,    // Mucho más pequeño (era 5250)
+    minTrackLength: 800,     // Mucho más pequeño (era 3000)
+    urbanAreaRadius: 2000,   // Mucho más pequeño (era 6000)
+    stationsPerTrack: 2,     // Reducido (era 3)
+    stationsPerConnection: 1, // Reducido (era 2)
+    minStationDistance: 0.1  // Mucho más pequeño (era 0.2)
   },
   [MapSize.MEDIUM]: {
     maxTrackLength: 10500,   // Reducido 3 veces (31500 / 3)
