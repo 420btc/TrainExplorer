@@ -139,6 +139,27 @@ export const gameLevels: GameLevel[] = [
     initialMoney: 100,
     initialHappiness: 80,
     trainCapacity: 8 // Capacidad máxima
+  },
+  {
+    id: 6,
+    name: "Modo Extremo",
+    description: "Red de metro masiva con 100 veces más vías - ¡El desafío definitivo!",
+    difficulty: "expert",
+    passengerFrequency: 3, // Generación muy rápida de pasajeros
+    maxPassengers: 50, // Muchos pasajeros simultáneos
+    eventFrequency: 15, // Eventos muy frecuentes
+    objectives: [
+      { type: 'money', target: 500, current: 0 }, // Objetivo muy alto de dinero
+      { type: 'happiness', target: 20, current: 0 }, // Muy difícil mantener felicidad
+      { type: 'passengers', target: 200, current: 0 }, // Muchos pasajeros que transportar
+      { type: 'time', target: 3600, current: 0 } // 1 hora para completar
+    ],
+    unlocked: true, // Desbloqueado para pruebas
+    completed: false,
+    timeLimit: 3600, // 1 hora
+    initialMoney: 200, // Más dinero inicial para el desafío
+    initialHappiness: 90, // Empezar con alta felicidad
+    trainCapacity: 12 // Capacidad máxima del tren
   }
 ];
 

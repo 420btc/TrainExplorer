@@ -74,7 +74,7 @@ const LoadingMiniMap: React.FC<LoadingMiniMapProps> = ({ isVisible, center, isEx
     canvas.height = canvasHeight;
   }, [isExpanded, isVisible]);
 
-  // Renderizar el mini-mapa con vías reales
+  // Renderizar el mini-mapa con vías reales (optimizado para muchas vías)
   useEffect(() => {
     if (!isVisible || !canvasRef.current) return;
 
@@ -91,10 +91,18 @@ const LoadingMiniMap: React.FC<LoadingMiniMapProps> = ({ isVisible, center, isEx
 
     if (generatedTracks.length === 0) return;
 
+    // Optimización: Limitar el número de vías dibujadas para mantener rendimiento
+    const maxTracksToRender = 200; // Límite para evitar sobrecarga
+    const tracksToRender = generatedTracks.length > maxTracksToRender 
+      ? generatedTracks.slice(-maxTracksToRender) // Mostrar las más recientes
+      : generatedTracks;
+
     // Calcular límites para normalización
     const allCoords: Coordinates[] = [];
-    generatedTracks.forEach(track => {
-      allCoords.push(...track.path);
+    tracksToRender.forEach(track => {
+      // Optimización: Reducir puntos por vía para mejorar rendimiento
+      const simplifiedPath = track.path.filter((_, index) => index % 2 === 0 || index === track.path.length - 1);
+      allCoords.push(...simplifiedPath);
     });
 
     if (allCoords.length === 0) return;
@@ -120,41 +128,66 @@ const LoadingMiniMap: React.FC<LoadingMiniMapProps> = ({ isVisible, center, isEx
     minLng -= lngMargin;
     maxLng += lngMargin;
 
-    // Dibujar las vías reales con efecto de aparición
-    generatedTracks.forEach((track, index) => {
-      if (track.path.length < 2) return;
+    // Optimización: Usar un solo path para todas las vías del mismo color
+    const tracksByColor = new Map<string, TrackSegment[]>();
+    tracksToRender.forEach(track => {
+      const color = track.color;
+      if (!tracksByColor.has(color)) {
+        tracksByColor.set(color, []);
+      }
+      tracksByColor.get(color)!.push(track);
+    });
 
-      ctx.strokeStyle = track.color;
+    // Dibujar las vías agrupadas por color para mejor rendimiento
+    tracksByColor.forEach((tracks, color) => {
+      ctx.strokeStyle = color;
       ctx.lineWidth = 1.5; // Líneas más finas
       ctx.globalAlpha = 0.9;
-
       ctx.beginPath();
 
-      // Normalizar coordenadas y dibujar
+      tracks.forEach(track => {
+        if (track.path.length < 2) return;
+
+        // Simplificar path para mejor rendimiento
+        const simplifiedPath = track.path.filter((_, index) => index % 2 === 0 || index === track.path.length - 1);
+        
+        // Normalizar coordenadas y dibujar
+        const trackCoords = simplifiedPath.map(coord => {
+          const x = ((coord.lng - minLng) / (maxLng - minLng)) * canvasWidth;
+          const y = ((maxLat - coord.lat) / (maxLat - minLat)) * canvasHeight;
+          return { x, y };
+        });
+
+        // Dibujar la vía
+        if (trackCoords.length > 0) {
+          ctx.moveTo(trackCoords[0].x, trackCoords[0].y);
+          for (let i = 1; i < trackCoords.length; i++) {
+            ctx.lineTo(trackCoords[i].x, trackCoords[i].y);
+          }
+        }
+      });
+      
+      ctx.stroke();
+    });
+
+    // Añadir efecto de "chispa" solo en las vías más recientes para mejor rendimiento
+    const recentTracks = tracksToRender.slice(-5); // Solo las 5 más recientes
+    recentTracks.forEach(track => {
+      if (track.path.length < 2) return;
+
       const trackCoords = track.path.map(coord => {
         const x = ((coord.lng - minLng) / (maxLng - minLng)) * canvasWidth;
         const y = ((maxLat - coord.lat) / (maxLat - minLat)) * canvasHeight;
         return { x, y };
       });
 
-      // Dibujar la vía completa con efecto de aparición progresiva
       if (trackCoords.length > 0) {
-        ctx.moveTo(trackCoords[0].x, trackCoords[0].y);
-        for (let i = 1; i < trackCoords.length; i++) {
-          ctx.lineTo(trackCoords[i].x, trackCoords[i].y);
-        }
-        ctx.stroke();
-
-        // Añadir efecto de "chispa" en los extremos de las vías recién generadas
-        const isRecentTrack = index >= generatedTracks.length - 2;
-        if (isRecentTrack) {
-          const lastPoint = trackCoords[trackCoords.length - 1];
-          ctx.fillStyle = '#ffffff';
-          ctx.globalAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
-          ctx.beginPath();
-          ctx.arc(lastPoint.x, lastPoint.y, 3, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        const lastPoint = trackCoords[trackCoords.length - 1];
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+        ctx.beginPath();
+        ctx.arc(lastPoint.x, lastPoint.y, 3, 0, Math.PI * 2);
+        ctx.fill();
       }
     });
 

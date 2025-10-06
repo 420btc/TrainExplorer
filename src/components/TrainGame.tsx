@@ -13,7 +13,9 @@ import {
   findConnectingTrack,
   ConnectingTrackInfo,
   geocodeAddress,
-  calculateDistance
+  calculateDistance,
+  MapSize,
+  getCurrentMapSize
 } from '@/lib/mapUtils';
 import { setGlobalTracks } from '@/lib/routeUtils';
 import { toast } from 'sonner';
@@ -213,8 +215,13 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     }
     
     try {
-      // Generar la red de vías basada en calles reales
-      const trackNetwork = await generateTrackNetwork(center);
+      // Usar el tamaño de mapa seleccionado en MainMenu en lugar del nivel
+      const mapSize: MapSize = getCurrentMapSize();
+      
+      console.log(`Generando red de metro en modo ${mapSize} seleccionado por el usuario`);
+      
+      // Generar la red de vías basada en calles reales con el tamaño apropiado
+      const trackNetwork = await generateTrackNetwork(center, mapSize);
       setTracks(trackNetwork);
       
       // Generar estaciones a lo largo de las vías

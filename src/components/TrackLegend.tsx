@@ -37,25 +37,30 @@ const TrackLegend: React.FC<TrackLegendProps> = ({ tracks, stations = [] }) => {
     <div className="bg-white bg-opacity-90 p-3 rounded-md shadow-md max-w-[260px] border border-gray-200">
       <div className="flex items-center mb-2">
         <Train className="h-4 w-4 mr-2 text-primary" />
-        <h3 className="text-xs font-bold border-b pb-1 w-full">Red de Metro</h3>
+        <h3 className="text-xs font-bold border-b pb-1 w-full">
+          Red de Metro {mainTracks.length > 0 && `(${mainTracks.length} líneas)`}
+        </h3>
       </div>
       
-      <ul className="space-y-1 mb-2">
-        {tracksWithNames.map((track) => (
-          <li key={track.id} className="text-[10px]">
-            <div className="flex items-center">
-              <div 
-                className="w-3 h-3 rounded-full mr-1.5 flex-shrink-0" 
-                style={{ backgroundColor: track.color }}
-              />
-              <span className="font-semibold">{track.lineName}</span>
-            </div>
-            <div className="ml-4.5 text-gray-600 text-[9px] mt-0.5 truncate max-w-[220px]">
-              {track.destination}
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* Contenedor con altura fija equivalente a ~10 líneas pero mostrando todas con scroll */}
+      <div className="h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <ul className="space-y-1 mb-2">
+          {tracksWithNames.map((track) => (
+            <li key={track.id} className="text-[10px]">
+              <div className="flex items-center">
+                <div 
+                  className="w-3 h-3 rounded-full mr-1.5 flex-shrink-0" 
+                  style={{ backgroundColor: track.color }}
+                />
+                <span className="font-semibold">{track.lineName}</span>
+              </div>
+              <div className="ml-4.5 text-gray-600 text-[9px] mt-0.5 truncate max-w-[220px]">
+                {track.destination}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
       
       {mainTracks.length === 0 && (
         <p className="text-xs text-gray-500 italic">No hay líneas disponibles</p>

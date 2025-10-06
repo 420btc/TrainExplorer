@@ -100,10 +100,10 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
           {/* Selector de tamaño de mapa */}
           <div className="mb-8 drop-shadow-lg">
             <h3 className="text-white text-lg mb-4 font-semibold drop-shadow-md">Tamaño del Mapa</h3>
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-3">
               <Button
                 onClick={() => setSelectedMapSize(MapSize.SMALL)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all shadow-lg ${
+                className={`px-4 py-3 rounded-lg font-medium transition-all shadow-lg ${
                   selectedMapSize === MapSize.SMALL
                     ? 'bg-white text-[#FF5722] border-2 border-white drop-shadow-lg'
                     : 'bg-black/30 text-white border-2 border-white/50 hover:bg-white/20 drop-shadow-md'
@@ -113,7 +113,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
               </Button>
               <Button
                 onClick={() => setSelectedMapSize(MapSize.MEDIUM)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all shadow-lg ${
+                className={`px-4 py-3 rounded-lg font-medium transition-all shadow-lg ${
                   selectedMapSize === MapSize.MEDIUM
                     ? 'bg-white text-[#FF5722] border-2 border-white drop-shadow-lg'
                     : 'bg-black/30 text-white border-2 border-white/50 hover:bg-white/20 drop-shadow-md'
@@ -123,13 +123,23 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
               </Button>
               <Button
                 onClick={() => setSelectedMapSize(MapSize.LARGE)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all shadow-lg ${
+                className={`px-4 py-3 rounded-lg font-medium transition-all shadow-lg ${
                   selectedMapSize === MapSize.LARGE
                     ? 'bg-white text-[#FF5722] border-2 border-white drop-shadow-lg'
                     : 'bg-black/30 text-white border-2 border-white/50 hover:bg-white/20 drop-shadow-md'
                 }`}
               >
                 Grande
+              </Button>
+              <Button
+                onClick={() => setSelectedMapSize(MapSize.EXTREME)}
+                className={`px-4 py-3 rounded-lg font-medium transition-all shadow-lg ${
+                  selectedMapSize === MapSize.EXTREME
+                    ? 'bg-white text-[#FF5722] border-2 border-white drop-shadow-lg'
+                    : 'bg-black/30 text-white border-2 border-white/50 hover:bg-white/20 drop-shadow-md'
+                }`}
+              >
+                Extremo
               </Button>
             </div>
           </div>

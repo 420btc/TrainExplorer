@@ -12,7 +12,8 @@ export interface Coordinates {
 export enum MapSize {
   SMALL = 'small',
   MEDIUM = 'medium', 
-  LARGE = 'large'
+  LARGE = 'large',
+  EXTREME = 'extreme'
 }
 
 // Configuración de parámetros por tamaño de mapa
@@ -50,6 +51,14 @@ export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
     stationsPerTrack: 8,     // Tamaño actual
     stationsPerConnection: 5, // Tamaño actual
     minStationDistance: 1.2  // Tamaño actual
+  },
+  [MapSize.EXTREME]: {
+    maxTrackLength: 315000,  // 100 veces más grande que LARGE
+    minTrackLength: 180000,  // 100 veces más grande que LARGE
+    urbanAreaRadius: 360000, // 100 veces más grande que LARGE
+    stationsPerTrack: 3,     // Pocas estaciones como solicitado
+    stationsPerConnection: 2, // Pocas estaciones como solicitado
+    minStationDistance: 12.0 // 100 veces más grande que LARGE
   }
 };
 
@@ -264,12 +273,16 @@ export const reverseGeocode = async (coordinates: Coordinates): Promise<Location
 };
 
 // Generate urban track network based on real streets
-export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSegment[]> => {
+export const generateTrackNetwork = async (center: Coordinates, mapSize: MapSize = MapSize.LARGE): Promise<TrackSegment[]> => {
   // Emitir evento de inicio
   trackGenerationEmitter.emit({
     progress: 0,
     message: "Iniciando generación de la red de metro..."
   });
+  
+  // Establecer el tamaño del mapa
+  setMapSize(mapSize);
+  
   try {
     // Create a smaller urban area to stay within city limits
     const tracks: TrackSegment[] = [];
@@ -284,13 +297,30 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
       '#E91E63'  // Rosa
     ];
     
-    // Generate 6-9 lines (like metro lines) - Aumentado para una red más densa
-    const lineCount = Math.floor(Math.random() * 4) + 6;
-    console.log(`Generating ${lineCount} metro lines...`);
+    // Ajustar el número de líneas según el tamaño del mapa
+    let lineCount: number;
+    switch (mapSize) {
+      case MapSize.SMALL:
+        lineCount = Math.floor(Math.random() * 3) + 3; // 3-5 líneas
+        break;
+      case MapSize.MEDIUM:
+        lineCount = Math.floor(Math.random() * 4) + 5; // 5-8 líneas
+        break;
+      case MapSize.LARGE:
+        lineCount = Math.floor(Math.random() * 4) + 6; // 6-9 líneas
+        break;
+      case MapSize.EXTREME:
+        lineCount = Math.floor(Math.random() * 20) + 50; // 50-69 líneas (100x más vías)
+        break;
+      default:
+        lineCount = Math.floor(Math.random() * 4) + 6;
+    }
+    
+    console.log(`Generating ${lineCount} metro lines for ${mapSize} map...`);
     
     trackGenerationEmitter.emit({
       progress: 5,
-      message: `Generando ${lineCount} líneas de metro...`
+      message: `Generando ${lineCount} líneas de metro en modo ${mapSize}...`
     });
     
     // Mapa para controlar los intentos por línea y evitar bucles infinitos
