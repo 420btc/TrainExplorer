@@ -1820,9 +1820,9 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     setTrainMoving(true);
     
     // Calcular el intervalo de tiempo basado en la velocidad
-    // Velocidad 1% = 3000ms (extremadamente lento), Velocidad 100% = 500ms (moderado)
-    // Fórmula ajustada para que el tren vaya más lento en modo automático
-    const interval = Math.max(500, 3000 - (trainSpeed * 25));
+    // Velocidad 1% = 4000ms (extremadamente lento), Velocidad 100% = 750ms (25% más lento)
+    // Fórmula ajustada para que el tren vaya 25% más lento en modo automático
+    const interval = Math.max(750, 4000 - (trainSpeed * 32.5));
     
     console.log("Modo automático con velocidad:", trainSpeed, "% - Intervalo:", interval, "ms");
     

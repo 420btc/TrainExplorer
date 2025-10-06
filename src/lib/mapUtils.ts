@@ -28,9 +28,9 @@ export interface Station {
 // Constants
 export const DEFAULT_COORDINATES: Coordinates = { lat: 36.7213, lng: -4.4214 }; // Málaga
 export const DEFAULT_ZOOM = 15;
-const MAX_TRACK_LENGTH = 1800; // Aumentado para vías más largas y mejor visualización
-const MIN_TRACK_LENGTH = 800; // Aumentado para evitar vías demasiado cortas
-const URBAN_AREA_RADIUS = 2500; // Mantiene la red compacta pero con vías más largas
+const MAX_TRACK_LENGTH = 3500; // Significativamente aumentado para vías mucho más largas
+const MIN_TRACK_LENGTH = 2000; // Aumentado para vías más largas como mínimo
+const URBAN_AREA_RADIUS = 4000; // Expandido para permitir vías más largas
 const STATIONS_PER_TRACK = 3; // Estaciones distribuidas en vías más largas
 const STATIONS_PER_CONNECTION = 2; // Número fijo de estaciones por conexión
 const MIN_STATION_DISTANCE = 0.3; // Aumentado para distribuir mejor las estaciones en vías más largas
