@@ -322,7 +322,7 @@ export const generateTrackNetwork = async (center: Coordinates, mapSize: MapSize
         lineCount = 11; // Exactamente 11 líneas
         break;
       case MapSize.CRAZY:
-        lineCount = 15; // Exactamente 15 líneas
+        lineCount = 8; // Reducido de 15 a 8 líneas para evitar stack overflow
         break;
       default:
         lineCount = Math.floor(Math.random() * 4) + 6;
