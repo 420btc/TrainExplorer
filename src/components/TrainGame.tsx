@@ -148,6 +148,13 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
   const tutorialShown = useRef(false);
   // Variable para controlar si estamos en modo búsqueda (para evitar mostrar el tutorial)
   const isSearchMode = useRef(false);
+
+  // Función para convertir el valor del slider a multiplicador real
+  const getSpeedMultiplier = useCallback((sliderValue: number): number => {
+    const speedMultipliers = [1, 2, 4, 8, 16];
+    const multiplierIndex = Math.min(Math.floor(sliderValue / 25), speedMultipliers.length - 1);
+    return speedMultipliers[multiplierIndex];
+  }, []);
   
   // Estados para las notificaciones de pasajeros
   const [pickupNotification, setPickupNotification] = useState({ visible: false, count: 0 });
@@ -893,7 +900,8 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
         
         // Programar para ocultar la notificación después de un tiempo basado en la velocidad
         // A mayor velocidad, menos tiempo se muestra la notificación para evitar acumulación
-        const hideDelay = trainSpeed > 80 ? 1500 : 2500;
+        const speedMultiplier = getSpeedMultiplier(trainSpeed);
+        const hideDelay = speedMultiplier > 4 ? 1500 : 2500;
         setTimeout(() => {
           setPickupNotification({ visible: false, count: 0 });
         }, hideDelay);
@@ -903,7 +911,8 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     });
     
     // Mostrar notificación toast solo a velocidades bajas o medias para evitar spam
-    if (trainSpeed < 70) {
+    const speedMultiplier = getSpeedMultiplier(trainSpeed);
+    if (speedMultiplier < 4) {
       toast.success(`Pasajero recogido en ${passenger.origin.name}`);
     }
   }, [trainCapacity, trainSpeed]);
@@ -945,7 +954,8 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     setPoints(prev => prev + basePoints + bonusPoints);
     
     // Mostrar notificación toast solo a velocidades bajas o medias para evitar spam
-    if (trainSpeed < 70) {
+    const speedMultiplier = getSpeedMultiplier(trainSpeed);
+    if (speedMultiplier < 4) {
       toast.success(`Pasajero entregado en ${passenger.destination.name}${timeText}. +$${moneyReward}, +${basePoints + bonusPoints} puntos${bonusText}`);
     }
     
@@ -959,7 +969,8 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
       
       // Programar para ocultar la notificación después de un tiempo basado en la velocidad
       // A mayor velocidad, menos tiempo se muestra la notificación para evitar acumulación
-      const hideDelay = trainSpeed > 80 ? 1500 : 2500;
+      const speedMultiplier = getSpeedMultiplier(trainSpeed);
+      const hideDelay = speedMultiplier > 4 ? 1500 : 2500;
       setTimeout(() => {
         setDropoffNotification({ visible: false, count: 0 });
       }, hideDelay);
@@ -1022,9 +1033,9 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     // Distancia máxima para considerar que el tren está cerca de una estación (en km)
     // Ajustamos el radio de detección según la velocidad del tren
     const baseRadius = 0.08; // Radio base en km
-    const speedFactor = trainSpeed / 100; // Factor de velocidad (0.5 para 50km/h, 1.0 para 100km/h)
+    const speedMultiplier = getSpeedMultiplier(trainSpeed); // Factor de velocidad basado en multiplicador
     const detectionRadius = autoMode ? 
-      Math.min(0.20, baseRadius + (speedFactor * 0.15)) : // Máximo 200m en modo auto
+      Math.min(0.20, baseRadius + (speedMultiplier * 0.03)) : // Máximo 200m en modo auto
       baseRadius;
     
     // Optimización: Crear un mapa de estaciones cercanas para evitar cálculos repetidos
@@ -1088,11 +1099,12 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
 
   // Efecto para verificar la proximidad a estaciones cuando el tren se mueve
   useEffect(() => {
-    if (trainPosition && (autoMode || trainSpeed >= 50)) {
+    const speedMultiplier = getSpeedMultiplier(trainSpeed);
+    if (trainPosition && (autoMode || speedMultiplier >= 2)) {
       // Verificar si hay pasajeros para recoger o dejar en estaciones cercanas
       checkPassengersAtStations();
     }
-  }, [trainPosition, autoMode, trainSpeed, checkPassengersAtStations]);
+  }, [trainPosition, autoMode, trainSpeed, checkPassengersAtStations, getSpeedMultiplier]);
 
   // Manejar la búsqueda de direcciones
   const handleSearch = useCallback(async (coordinates: Coordinates) => {
@@ -1152,7 +1164,8 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
 
   // Manejar el cambio de velocidad
   const handleSpeedChange = useCallback((speed: number) => {
-    console.log(`Cambiando velocidad del tren a: ${speed}%`);
+    const multiplier = getSpeedMultiplier(speed);
+    console.log(`Cambiando velocidad del tren a: x${multiplier} (slider: ${speed})`);
     setTrainSpeed(speed);
     
     // Si estamos en modo automático, reiniciar el intervalo con la nueva velocidad
@@ -1166,7 +1179,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
       setAutoMode(false);
       setTimeout(() => setAutoMode(true), 50);
     }
-  }, [autoMode]);
+  }, [autoMode, getSpeedMultiplier]);
 
 
 
@@ -1827,9 +1840,30 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     setTrainMoving(true);
     
     // Calcular el intervalo de tiempo basado en la velocidad
-    // Velocidad 1% = 4000ms (extremadamente lento), Velocidad 100% = 750ms (25% más lento)
-    // Fórmula ajustada para que el tren vaya 25% más lento en modo automático
-    let interval = Math.max(750, 4000 - (trainSpeed * 32.5));
+    // Calcular intervalo basado en multiplicadores de velocidad específicos
+    // x1 = 500ms, x2 = 100ms, x4 = 80ms, x8 = 50ms, x16 = 10ms
+    const speedMultiplier = getSpeedMultiplier(trainSpeed);
+    let interval;
+    
+    switch (speedMultiplier) {
+      case 1:
+        interval = 500;
+        break;
+      case 2:
+        interval = 100;
+        break;
+      case 4:
+        interval = 80;
+        break;
+      case 8:
+        interval = 50;
+        break;
+      case 16:
+        interval = 10;
+        break;
+      default:
+        interval = 500; // Fallback a x1
+    }
     
     // Si estamos en modo extremo, hacer el tren 50% más rápido
     const currentMapSize = getCurrentMapSize();
@@ -1839,7 +1873,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
       interval = interval * 0.25; // 75% más rápido = reducir intervalo a un cuarto
     }
     
-    console.log("Modo automático con velocidad:", trainSpeed, "% - Intervalo:", interval, "ms", 
+    console.log("Modo automático con velocidad:", `x${speedMultiplier}`, "- Intervalo:", interval, "ms", 
       currentMapSize === MapSize.EXTREME ? "(Modo Extremo - 50% más rápido)" : 
       currentMapSize === MapSize.CRAZY ? "(Modo Loco - 75% más rápido)" : "");
     

@@ -20,27 +20,41 @@ export interface GameHeaderProps {
 }
 
 const GameHeader: React.FC<GameHeaderProps> = ({ speed, onSpeedChange }) => {
+  // Mapear valores del slider a multiplicadores
+  const speedMultipliers = [1, 2, 4, 8, 16];
+  const currentMultiplierIndex = Math.min(Math.floor(speed / 25), speedMultipliers.length - 1);
+  const currentMultiplier = speedMultipliers[currentMultiplierIndex];
+
+  const handleSliderChange = (value: number[]) => {
+    // Convertir el valor del slider (0-100) a índice de multiplicador (0-4)
+    const multiplierIndex = Math.min(Math.floor(value[0] / 25), speedMultipliers.length - 1);
+    // Convertir de vuelta a valor de slider para mantener consistencia
+    const sliderValue = multiplierIndex * 25;
+    onSpeedChange(sliderValue);
+  };
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-medium">Velocidad</span>
-        <Badge variant="outline" className="text-xs h-4 px-1">{speed}%</Badge>
+        <Badge variant="outline" className="text-xs h-4 px-1">x{currentMultiplier}</Badge>
       </div>
       <div className="flex items-center gap-1">
         <Slider 
           defaultValue={[speed]} 
           max={100} 
-          step={5}
+          step={25}
           className="w-full"
-          onValueChange={(value) => onSpeedChange(value[0])}
+          onValueChange={handleSliderChange}
         />
         <Button 
           variant="outline" 
           size="icon" 
           className="h-5 w-5 flex-shrink-0"
           onClick={() => {
-            // Configuración de velocidad
-            const newSpeed = speed >= 100 ? 25 : speed + 25;
+            // Ciclar entre multiplicadores: x1 -> x2 -> x4 -> x8 -> x16 -> x1
+            const nextIndex = (currentMultiplierIndex + 1) % speedMultipliers.length;
+            const newSpeed = nextIndex * 25;
             onSpeedChange(newSpeed);
           }}
         >
