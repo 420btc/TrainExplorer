@@ -141,6 +141,16 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
               >
                 Extremo
               </Button>
+              <Button
+                onClick={() => setSelectedMapSize(MapSize.CRAZY)}
+                className={`px-4 py-3 rounded-lg font-medium transition-all shadow-lg ${
+                  selectedMapSize === MapSize.CRAZY
+                    ? 'bg-white text-[#FF5722] border-2 border-white drop-shadow-lg'
+                    : 'bg-black/30 text-white border-2 border-white/50 hover:bg-white/20 drop-shadow-md'
+                }`}
+              >
+                Loco
+              </Button>
             </div>
           </div>
 

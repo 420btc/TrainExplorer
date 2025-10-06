@@ -13,7 +13,8 @@ export enum MapSize {
   SMALL = 'small',
   MEDIUM = 'medium', 
   LARGE = 'large',
-  EXTREME = 'extreme'
+  EXTREME = 'extreme',
+  CRAZY = 'crazy'
 }
 
 // Configuración de parámetros por tamaño de mapa
@@ -59,6 +60,14 @@ export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
     stationsPerTrack: 3,     // Pocas estaciones como solicitado
     stationsPerConnection: 2, // Pocas estaciones como solicitado
     minStationDistance: 12.0 // 100 veces más grande que LARGE
+  },
+  [MapSize.CRAZY]: {
+    maxTrackLength: 15750000,  // 50 veces más grande que EXTREME
+    minTrackLength: 9000000,   // 50 veces más grande que EXTREME
+    urbanAreaRadius: 18000000, // 50 veces más grande que EXTREME
+    stationsPerTrack: 2,       // Aún menos estaciones que EXTREME
+    stationsPerConnection: 1,  // Mínimas conexiones
+    minStationDistance: 800.0  // 50 veces más grande que EXTREME
   }
 };
 
@@ -310,7 +319,10 @@ export const generateTrackNetwork = async (center: Coordinates, mapSize: MapSize
         lineCount = Math.floor(Math.random() * 4) + 6; // 6-9 líneas
         break;
       case MapSize.EXTREME:
-        lineCount = Math.floor(Math.random() * 20) + 50; // 50-69 líneas (100x más vías)
+        lineCount = Math.floor(Math.random() * 10) + 35; // 35-44 líneas (límite de 40)
+        break;
+      case MapSize.CRAZY:
+        lineCount = Math.floor(Math.random() * 20) + 45; // 45-64 líneas (límite de 60)
         break;
       default:
         lineCount = Math.floor(Math.random() * 4) + 6;

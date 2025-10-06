@@ -1829,9 +1829,19 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     // Calcular el intervalo de tiempo basado en la velocidad
     // Velocidad 1% = 4000ms (extremadamente lento), Velocidad 100% = 750ms (25% más lento)
     // Fórmula ajustada para que el tren vaya 25% más lento en modo automático
-    const interval = Math.max(750, 4000 - (trainSpeed * 32.5));
+    let interval = Math.max(750, 4000 - (trainSpeed * 32.5));
     
-    console.log("Modo automático con velocidad:", trainSpeed, "% - Intervalo:", interval, "ms");
+    // Si estamos en modo extremo, hacer el tren 50% más rápido
+    const currentMapSize = getCurrentMapSize();
+    if (currentMapSize === MapSize.EXTREME) {
+      interval = interval * 0.5; // 50% más rápido = reducir intervalo a la mitad
+    } else if (currentMapSize === MapSize.CRAZY) {
+      interval = interval * 0.25; // 75% más rápido = reducir intervalo a un cuarto
+    }
+    
+    console.log("Modo automático con velocidad:", trainSpeed, "% - Intervalo:", interval, "ms", 
+      currentMapSize === MapSize.EXTREME ? "(Modo Extremo - 50% más rápido)" : 
+      currentMapSize === MapSize.CRAZY ? "(Modo Loco - 75% más rápido)" : "");
     
     // Resetear el historial de vías visitadas al iniciar el modo automático
     setLastVisitedTracks([]);

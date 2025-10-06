@@ -160,6 +160,27 @@ export const gameLevels: GameLevel[] = [
     initialMoney: 200, // Más dinero inicial para el desafío
     initialHappiness: 90, // Empezar con alta felicidad
     trainCapacity: 12 // Capacidad máxima del tren
+  },
+  {
+    id: 7,
+    name: "Modo Loco",
+    description: "¡Velocidad extrema y menos estaciones! 50 veces más rápido que el modo extremo",
+    difficulty: "expert",
+    passengerFrequency: 2, // Generación súper rápida de pasajeros
+    maxPassengers: 75, // Aún más pasajeros simultáneos
+    eventFrequency: 10, // Eventos súper frecuentes
+    objectives: [
+      { type: 'money', target: 750, current: 0 }, // Objetivo aún más alto de dinero
+      { type: 'happiness', target: 15, current: 0 }, // Extremadamente difícil mantener felicidad
+      { type: 'passengers', target: 300, current: 0 }, // Muchos más pasajeros que transportar
+      { type: 'time', target: 2400, current: 0 } // 40 minutos para completar
+    ],
+    unlocked: true, // Desbloqueado para pruebas
+    completed: false,
+    timeLimit: 2400, // 40 minutos
+    initialMoney: 300, // Más dinero inicial para el desafío extremo
+    initialHappiness: 95, // Empezar con muy alta felicidad
+    trainCapacity: 15 // Capacidad máxima del tren
   }
 ];
 
