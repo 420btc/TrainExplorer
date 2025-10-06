@@ -8,6 +8,54 @@ export interface Coordinates {
   lng: number;
 }
 
+// Enum para los tamaños de mapa
+export enum MapSize {
+  SMALL = 'small',
+  MEDIUM = 'medium', 
+  LARGE = 'large'
+}
+
+// Configuración de parámetros por tamaño de mapa
+export interface MapSizeConfig {
+  maxTrackLength: number;
+  minTrackLength: number;
+  urbanAreaRadius: number;
+  stationsPerTrack: number;
+  stationsPerConnection: number;
+  minStationDistance: number;
+}
+
+// Configuraciones para cada tamaño
+export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
+  [MapSize.SMALL]: {
+    maxTrackLength: 5250,    // Reducido 6 veces (31500 / 6)
+    minTrackLength: 3000,    // Reducido 6 veces (18000 / 6)
+    urbanAreaRadius: 6000,   // Reducido 6 veces (36000 / 6)
+    stationsPerTrack: 3,     // Reducido proporcionalmente
+    stationsPerConnection: 2, // Reducido proporcionalmente
+    minStationDistance: 0.2  // Reducido 6 veces (1.2 / 6)
+  },
+  [MapSize.MEDIUM]: {
+    maxTrackLength: 10500,   // Reducido 3 veces (31500 / 3)
+    minTrackLength: 6000,    // Reducido 3 veces (18000 / 3)
+    urbanAreaRadius: 12000,  // Reducido 3 veces (36000 / 3)
+    stationsPerTrack: 5,     // Reducido proporcionalmente
+    stationsPerConnection: 3, // Reducido proporcionalmente
+    minStationDistance: 0.4  // Reducido 3 veces (1.2 / 3)
+  },
+  [MapSize.LARGE]: {
+    maxTrackLength: 31500,   // Tamaño actual
+    minTrackLength: 18000,   // Tamaño actual
+    urbanAreaRadius: 36000,  // Tamaño actual
+    stationsPerTrack: 8,     // Tamaño actual
+    stationsPerConnection: 5, // Tamaño actual
+    minStationDistance: 1.2  // Tamaño actual
+  }
+};
+
+// Variable global para el tamaño de mapa seleccionado
+let currentMapSize: MapSize = MapSize.LARGE;
+
 export interface TrackSegment {
   id: string;
   path: Coordinates[];
@@ -28,12 +76,26 @@ export interface Station {
 // Constants
 export const DEFAULT_COORDINATES: Coordinates = { lat: 36.7213, lng: -4.4214 }; // Málaga
 export const DEFAULT_ZOOM = 15;
-const MAX_TRACK_LENGTH = 3500; // Significativamente aumentado para vías mucho más largas
-const MIN_TRACK_LENGTH = 2000; // Aumentado para vías más largas como mínimo
-const URBAN_AREA_RADIUS = 4000; // Expandido para permitir vías más largas
-const STATIONS_PER_TRACK = 3; // Estaciones distribuidas en vías más largas
-const STATIONS_PER_CONNECTION = 2; // Número fijo de estaciones por conexión
-const MIN_STATION_DISTANCE = 0.3; // Aumentado para distribuir mejor las estaciones en vías más largas
+
+// Función para obtener la configuración actual del mapa
+const getCurrentConfig = (): MapSizeConfig => MAP_SIZE_CONFIGS[currentMapSize];
+
+// Funciones para obtener valores dinámicos basados en el tamaño seleccionado
+const getMaxTrackLength = (): number => getCurrentConfig().maxTrackLength;
+const getMinTrackLength = (): number => getCurrentConfig().minTrackLength;
+const getUrbanAreaRadius = (): number => getCurrentConfig().urbanAreaRadius;
+const getStationsPerTrack = (): number => getCurrentConfig().stationsPerTrack;
+const getStationsPerConnection = (): number => getCurrentConfig().stationsPerConnection;
+const getMinStationDistance = (): number => getCurrentConfig().minStationDistance;
+
+// Función para cambiar el tamaño del mapa
+export const setMapSize = (size: MapSize): void => {
+  currentMapSize = size;
+  console.log(`Tamaño de mapa cambiado a: ${size}`, getCurrentConfig());
+};
+
+// Función para obtener el tamaño actual del mapa
+export const getCurrentMapSize = (): MapSize => currentMapSize;
 
 // Token de MapBox para geocodificación
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
@@ -322,7 +384,7 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
       
       // Si la distancia es menor que el mínimo, ajustar el punto final para aumentar la distancia
       let adjustedEndPoint = {...endPoint};
-      if (directDistance < MIN_TRACK_LENGTH) {
+      if (directDistance < getMinTrackLength()) {
         // Calcular el vector de dirección
         const direction = {
           lat: endPoint.lat - startPoint.lat,
@@ -337,7 +399,7 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
         };
         
         // Calcular factor de escala para alcanzar la distancia mínima
-        const scaleFactor = MIN_TRACK_LENGTH / (directDistance || 1); // Evitar división por cero
+        const scaleFactor = getMinTrackLength() / (directDistance || 1); // Evitar división por cero
         
         // Ajustar el punto final
         adjustedEndPoint = {
@@ -424,8 +486,8 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
         distanceFactor = 0.6;
       }
       
-      const distance = Math.min(URBAN_AREA_RADIUS * 0.7 * distanceFactor, 
-                               Math.max(MIN_TRACK_LENGTH, Math.random() * MAX_TRACK_LENGTH * distanceFactor));
+      const distance = Math.min(getUrbanAreaRadius() * 0.7 * distanceFactor,
+                                   Math.max(getMinTrackLength(), Math.random() * getMaxTrackLength() * distanceFactor));
       
       const endPoint = turf.destination(
         [center.lng, center.lat],
@@ -584,8 +646,8 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
     if (tracks.length === 0) {
       console.log('No tracks were created, adding default track');
       const randomAngle = Math.random() * 360;
-      const randomDistance = Math.min(URBAN_AREA_RADIUS * 0.6, 
-                                   Math.max(MIN_TRACK_LENGTH, Math.random() * MAX_TRACK_LENGTH));
+      const randomDistance = Math.min(getUrbanAreaRadius() * 0.6, 
+                                   Math.max(getMinTrackLength(), Math.random() * getMaxTrackLength()));
       
       const endPoint = turf.destination(
         [center.lng, center.lat],
@@ -670,7 +732,7 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
                 [mainTracks[j].path[p2].lng, mainTracks[j].path[p2].lat]
               ) * 1000; // Convertir a metros
               
-              if (dist < trackDistance && dist >= 400 && dist < URBAN_AREA_RADIUS * 0.6) {
+              if (dist < trackDistance && dist >= 400 && dist < getUrbanAreaRadius() * 0.6) {
                 trackDistance = dist;
                 point1Index = p1;
                 point2Index = p2;
@@ -685,7 +747,7 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
         }
         
         // Si encontramos una conexión válida, crear la vía de conexión
-        if (closestTrack >= 0 && minDistance < URBAN_AREA_RADIUS * 0.6) {
+        if (closestTrack >= 0 && minDistance < getUrbanAreaRadius() * 0.6) {
           // Encontrar los puntos más cercanos entre las dos vías nuevamente
           let minDist = Infinity;
           let point1 = mainTracks[i].path[0];
@@ -823,8 +885,8 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
             
             // Asegurar que la conexión no sea demasiado corta ni demasiado larga
             // Mínimo 400m para evitar conexiones demasiado cortas
-            // Máximo URBAN_AREA_RADIUS * 0.6 para mantener conexiones urbanas razonables
-            if (distance >= 400 && distance < URBAN_AREA_RADIUS * 0.6) {
+            // Máximo getUrbanAreaRadius() * 0.6 para mantener conexiones urbanas razonables
+      if (distance >= 400 && distance < getUrbanAreaRadius() * 0.6) {
               try {
                 // Get route between these points
                 const response = await fetch(
@@ -982,7 +1044,7 @@ export const generateStations = (tracks: TrackSegment[]): Station[] => {
           [point.lng, point.lat],
           [existingPoint.lng, existingPoint.lat]
         );
-        if (distance < MIN_STATION_DISTANCE) {
+        if (distance < getMinStationDistance()) {
           return true;
         }
       } catch (error) {
@@ -1133,7 +1195,7 @@ export const generateStations = (tracks: TrackSegment[]): Station[] => {
   mainTracks.forEach((track) => {
     try {
       console.log(`Generating stations for track ${track.id}...`);
-      distributeStationsEvenly(track, STATIONS_PER_TRACK);
+      distributeStationsEvenly(track, getStationsPerTrack());
     } catch (error) {
       console.error(`Error generating stations for track ${track.id}:`, error);
     }
@@ -1143,7 +1205,7 @@ export const generateStations = (tracks: TrackSegment[]): Station[] => {
   connectionTracks.forEach((track) => {
     try {
       console.log(`Generating stations for connection ${track.id}...`);
-      distributeStationsEvenly(track, STATIONS_PER_CONNECTION);
+      distributeStationsEvenly(track, getStationsPerConnection());
     } catch (error) {
       console.error(`Error generating stations for connection ${track.id}:`, error);
     }
