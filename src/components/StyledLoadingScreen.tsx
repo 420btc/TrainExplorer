@@ -4,6 +4,7 @@ import { Train } from 'lucide-react';
 import SimpleTrainAnimation from './SimpleTrainAnimation';
 import LoadingMiniMap from './LoadingMiniMap';
 import { trackGenerationEmitter } from '@/lib/trackGenerationEmitter';
+import loadingImg from '@/assets/loading.png';
 
 interface StyledLoadingScreenProps {
   isVisible: boolean;
@@ -46,7 +47,7 @@ const StyledLoadingScreen: React.FC<StyledLoadingScreenProps> = ({ isVisible, ce
       {/* Fondo con imagen loading.png */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/src/assets/loading.png)' }}
+        style={{ backgroundImage: `url(${loadingImg})` }}
       >
         {/* Overlay oscuro para mejorar la legibilidad */}
         <div className="absolute inset-0 bg-black/40"></div>

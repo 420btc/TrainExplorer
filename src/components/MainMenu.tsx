@@ -4,6 +4,7 @@ import { Train } from 'lucide-react';
 import SimpleTrainAnimation from './SimpleTrainAnimation';
 import HomeSearchBar from './HomeSearchBar';
 import { Coordinates, MapSize, setMapSize } from '@/lib/mapUtils';
+import mapgoportadaImg from '@/assets/mapgoportada.png';
 
 interface MainMenuProps {
   onStartGame: (coordinates?: Coordinates) => void;
@@ -32,7 +33,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: 'url(/src/assets/mapgoportada.png)',
+          backgroundImage: `url(${mapgoportadaImg})`,
         }}
       />
       
