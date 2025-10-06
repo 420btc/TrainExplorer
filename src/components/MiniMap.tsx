@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { TrackSegment, Coordinates, Station } from '@/lib/mapUtils';
 
 interface MiniMapProps {
@@ -64,9 +64,39 @@ const MiniMap: React.FC<MiniMapProps> = ({
     return { normalizedCoords, minLat, maxLat, minLng, maxLng };
   };
   
+  // Memoizar las coordenadas para evitar recálculos innecesarios
+  const allCoordinates = useMemo(() => {
+    const coords: Coordinates[] = [];
+    
+    // Verificar que tracks existe y tiene elementos válidos
+    if (tracks && Array.isArray(tracks)) {
+      tracks.forEach(track => {
+        if (track && track.path && Array.isArray(track.path)) {
+          coords.push(...track.path);
+        }
+      });
+    }
+    
+    // Verificar que stations existe y tiene elementos válidos
+    if (stations && Array.isArray(stations)) {
+      stations.forEach(station => {
+        if (station && station.position) {
+          coords.push(station.position);
+        }
+      });
+    }
+    
+    // Agregar posición del tren si existe
+    if (trainPosition) {
+      coords.push(trainPosition);
+    }
+    
+    return coords;
+  }, [tracks, stations, trainPosition]);
+
   // Renderizar el mapa en el canvas
   useEffect(() => {
-    if (!isOpen || !canvasRef.current) return;
+    if (!isOpen || !canvasRef.current || allCoordinates.length === 0) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -79,20 +109,6 @@ const MiniMap: React.FC<MiniMapProps> = ({
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     
-    // Recopilar todas las coordenadas para normalización
-    const allCoordinates: Coordinates[] = [];
-    tracks.forEach(track => {
-      allCoordinates.push(...track.path);
-    });
-    
-    stations.forEach(station => {
-      allCoordinates.push(station.position);
-    });
-    
-    if (trainPosition) {
-      allCoordinates.push(trainPosition);
-    }
-    
     // Normalizar coordenadas
     const { normalizedCoords, minLat, maxLat, minLng, maxLng } = 
       normalizeCoordinates(allCoordinates, canvasWidth, canvasHeight);
@@ -101,54 +117,55 @@ const MiniMap: React.FC<MiniMapProps> = ({
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
     
-    tracks.forEach(track => {
-      if (track.path.length < 2) return;
-      
-      ctx.beginPath();
-      
-      // Normalizar las coordenadas de la vía
-      const trackCoords = track.path.map(coord => {
-        const x = ((coord.lng - minLng) / (maxLng - minLng)) * canvasWidth;
-        const y = ((maxLat - coord.lat) / (maxLat - minLat)) * canvasHeight;
-        return { x, y };
+    if (tracks && Array.isArray(tracks)) {
+      tracks.forEach(track => {
+        if (!track || !track.path || !Array.isArray(track.path) || track.path.length < 2) return;
+        
+        ctx.beginPath();
+        
+        // Normalizar las coordenadas de la vía
+        const trackCoords = track.path.map(coord => {
+          const x = ((coord.lng - minLng) / (maxLng - minLng)) * canvasWidth;
+          const y = ((maxLat - coord.lat) / (maxLat - minLat)) * canvasHeight;
+          return { x, y };
+        });
+        
+        // Dibujar la línea
+        ctx.moveTo(trackCoords[0].x, trackCoords[0].y);
+        for (let i = 1; i < trackCoords.length; i++) {
+          ctx.lineTo(trackCoords[i].x, trackCoords[i].y);
+        }
+        
+        ctx.stroke();
       });
-      
-      // Dibujar la línea
-      ctx.moveTo(trackCoords[0].x, trackCoords[0].y);
-      for (let i = 1; i < trackCoords.length; i++) {
-        ctx.lineTo(trackCoords[i].x, trackCoords[i].y);
-      }
-      
-      ctx.stroke();
-    });
+    }
     
     // Dibujar las estaciones
     ctx.fillStyle = '#4A8C2A';
-    stations.forEach(station => {
-      const x = ((station.position.lng - minLng) / (maxLng - minLng)) * canvasWidth;
-      const y = ((maxLat - station.position.lat) / (maxLat - minLat)) * canvasHeight;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    if (stations && Array.isArray(stations)) {
+      stations.forEach(station => {
+        if (!station || !station.position) return;
+        
+        const x = ((station.position.lng - minLng) / (maxLng - minLng)) * canvasWidth;
+        const y = ((maxLat - station.position.lat) / (maxLat - minLat)) * canvasHeight;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+    }
     
-    // Dibujar la posición del tren
+    // Dibujar el tren
     if (trainPosition) {
-      const x = ((trainPosition.lng - minLng) / (maxLng - minLng)) * canvasWidth;
-      const y = ((maxLat - trainPosition.lat) / (maxLat - minLat)) * canvasHeight;
+      const trainX = ((trainPosition.lng - minLng) / (maxLng - minLng)) * canvasWidth;
+      const trainY = ((maxLat - trainPosition.lat) / (maxLat - minLat)) * canvasHeight;
       
       ctx.fillStyle = '#FF5722';
       ctx.beginPath();
-      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.arc(trainX, trainY, 6, 0, 2 * Math.PI);
       ctx.fill();
-      
-      // Añadir un borde al tren para destacarlo
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
     }
-  }, [isOpen, tracks, trainPosition, stations]);
+  }, [isOpen, allCoordinates]);
   
   if (!isOpen) return null;
   

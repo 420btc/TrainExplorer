@@ -35,7 +35,7 @@ export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
     urbanAreaRadius: 2000,   // Mucho más pequeño (era 6000)
     stationsPerTrack: 2,     // Reducido (era 3)
     stationsPerConnection: 1, // Reducido (era 2)
-    minStationDistance: 0.1  // Mucho más pequeño (era 0.2)
+    minStationDistance: 0.2  // Mucho más pequeño (era 0.2)
   },
   [MapSize.MEDIUM]: {
     maxTrackLength: 10500,   // Reducido 3 veces (31500 / 3)
@@ -43,15 +43,15 @@ export const MAP_SIZE_CONFIGS: Record<MapSize, MapSizeConfig> = {
     urbanAreaRadius: 12000,  // Reducido 3 veces (36000 / 3)
     stationsPerTrack: 5,     // Reducido proporcionalmente
     stationsPerConnection: 3, // Reducido proporcionalmente
-    minStationDistance: 0.4  // Reducido 3 veces (1.2 / 3)
+    minStationDistance: 0.9  // Reducido 3 veces (1.2 / 3)
   },
   [MapSize.LARGE]: {
     maxTrackLength: 31500,   // Tamaño actual
     minTrackLength: 18000,   // Tamaño actual
     urbanAreaRadius: 36000,  // Tamaño actual
-    stationsPerTrack: 8,     // Tamaño actual
+    stationsPerTrack: 6,     // Tamaño actual
     stationsPerConnection: 5, // Tamaño actual
-    minStationDistance: 1.2  // Tamaño actual
+    minStationDistance: 2.2  // Tamaño actual
   },
   [MapSize.EXTREME]: {
     maxTrackLength: 315000,  // 100 veces más grande que LARGE
@@ -319,10 +319,10 @@ export const generateTrackNetwork = async (center: Coordinates, mapSize: MapSize
         lineCount = Math.floor(Math.random() * 4) + 6; // 6-9 líneas
         break;
       case MapSize.EXTREME:
-        lineCount = Math.floor(Math.random() * 10) + 35; // 35-44 líneas (límite de 40)
+        lineCount = 11; // Exactamente 11 líneas
         break;
       case MapSize.CRAZY:
-        lineCount = Math.floor(Math.random() * 20) + 45; // 45-64 líneas (límite de 60)
+        lineCount = 15; // Exactamente 15 líneas
         break;
       default:
         lineCount = Math.floor(Math.random() * 4) + 6;
