@@ -1,33 +1,30 @@
 .console-banner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 960px; /* 20% más grande que 800px */
-  margin: 0 auto;
-  background-color: rgba(0, 0, 0, 0.7);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #111827; /* bg-gray-900 */
   border-radius: 10px;
   padding: 10px;
   color: #fff;
   font-family: 'Courier New', monospace;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   z-index: 1000;
-  max-height: 40vh; /* Aumentado para mostrar más mensajes */
   display: flex;
-  flex-direction: column; /* Cambiado a vertical para más espacio */
-  border: 2px solid #000;
+  flex-direction: column;
+  border: 1px solid #374151; /* border-gray-700 */
+  overflow: hidden;
 }
 
 .console-header {
   width: 100%;
   padding-bottom: 10px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #374151; /* border-gray-700 */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: #1F2937; /* bg-gray-800 */
 }
 
 .console-header h2 {
@@ -43,7 +40,7 @@
 
 .progress-container {
   height: 20px;
-  background-color: #333;
+  background-color: #374151; /* bg-gray-700 */
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 5px;
@@ -51,16 +48,23 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #ffffff, #cccccc, #888888, #444444);
-  background-size: 300% 100%;
-  animation: gradient-animation 3s ease infinite;
+  background: #3B82F6; /* bg-blue-500 */
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 0.9rem;
-  color: #ccc;
+  color: #9CA3AF; /* text-gray-400 */
+}
+
+.console-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #1F2937; /* bg-gray-800 */
+  border-radius: 5px;
+  padding: 10px;
+  border: 1px solid #374151; /* border-gray-700 */
 }
 
 .console-messages {
@@ -68,8 +72,9 @@
   flex-grow: 1;
   width: 100%;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #1F2937; /* bg-gray-800 */
   border-radius: 5px;
+  border: 1px solid #374151; /* border-gray-700 */
   font-size: 0.8rem;
   line-height: 1.3;
   max-height: 25vh; /* Altura máxima para mostrar más mensajes */
@@ -78,7 +83,7 @@
 .console-message {
   margin-bottom: 5px;
   padding: 3px 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #374151; /* border-gray-700 */
   word-break: break-word;
 }
 

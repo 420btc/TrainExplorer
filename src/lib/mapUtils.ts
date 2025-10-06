@@ -530,13 +530,28 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
               const hasSignificantOverlap = checkOverlappingRoutes(path, tracks);
               
               if (!hasSignificantOverlap) {
-                tracks.push({
+                const newTrack = {
                   id: `track-${i}`,
                   path: path,
                   distance: data.routes[0].distance,
                   color: color,
                   weight: 4
+                };
+                tracks.push(newTrack);
+                
+                // Emitir evento de vía generada
+                trackGenerationEmitter.emit({
+                  progress: lineProgress,
+                  message: `Línea ${i+1} generada exitosamente`,
+                  trackGenerated: {
+                    id: newTrack.id,
+                    path: newTrack.path,
+                    color: newTrack.color,
+                    lineNumber: i + 1
+                  },
+                  totalLines: lineCount
                 });
+                
                 console.log(`Successfully created line ${i+1} with ${path.length} points`);
               } else {
                 // Si hay superposición significativa, intentar con otro ángulo
@@ -549,12 +564,26 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
                 // Si ya hemos intentado demasiadas veces, aceptar la superposición
                 if (attempts >= 5) {
                   console.log(`Accepting line ${i+1} after ${attempts} attempts despite overlap`);
-                  tracks.push({
+                  const acceptedTrack = {
                     id: `track-${i}`,
                     path: path,
                     distance: data.routes[0].distance,
                     color: color,
                     weight: 4
+                  };
+                  tracks.push(acceptedTrack);
+                  
+                  // Emitir evento de vía generada
+                  trackGenerationEmitter.emit({
+                    progress: lineProgress,
+                    message: `Línea ${i+1} generada (con superposición)`,
+                    trackGenerated: {
+                      id: acceptedTrack.id,
+                      path: acceptedTrack.path,
+                      color: acceptedTrack.color,
+                      lineNumber: i + 1
+                    },
+                    totalLines: lineCount
                   });
                 } else {
                   // Cambiar el ángulo y reintentar en la próxima iteración
@@ -581,6 +610,20 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
             
             if (!hasSignificantOverlap) {
               tracks.push(fallbackTrack);
+              
+              // Emitir evento de vía generada (fallback)
+              trackGenerationEmitter.emit({
+                progress: lineProgress,
+                message: `Línea ${i+1} generada (ruta alternativa)`,
+                trackGenerated: {
+                  id: fallbackTrack.id,
+                  path: fallbackTrack.path,
+                  color: fallbackTrack.color,
+                  lineNumber: i + 1
+                },
+                totalLines: lineCount
+              });
+              
               console.log(`Created fallback line ${i+1} due to polyline error`);
             } else {
               // Si hay superposición significativa, intentar con otro ángulo

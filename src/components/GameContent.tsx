@@ -43,6 +43,7 @@ interface GameContentProps {
   setMapStyle: (style: 'street' | 'satellite') => void;
   toggleTrainMovement: () => void;
   handleTrackClick: (track: TrackSegment) => void;
+  onLoadingComplete?: () => void;
 }
 
 const GameContent: React.FC<GameContentProps> = ({
@@ -71,7 +72,8 @@ const GameContent: React.FC<GameContentProps> = ({
   initializeGame,
   setMapStyle,
   toggleTrainMovement,
-  handleTrackClick
+  handleTrackClick,
+  onLoadingComplete
 }) => {
   const { 
     money, 
@@ -163,7 +165,11 @@ const GameContent: React.FC<GameContentProps> = ({
         {/* Mapa y controles */}
         <div className="flex-1 relative">
           {isLoading ? (
-            <StyledLoadingScreen isVisible={true} />
+            <StyledLoadingScreen 
+              isVisible={true} 
+              center={mapCenter}
+              onLoadingComplete={onLoadingComplete}
+            />
           ) : (
             <>
               <MapContainer

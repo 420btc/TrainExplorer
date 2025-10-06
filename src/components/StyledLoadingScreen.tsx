@@ -1,13 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ConsoleBanner from './ConsoleBanner';
 import { Train } from 'lucide-react';
 import SimpleTrainAnimation from './SimpleTrainAnimation';
+import LoadingMiniMap from './LoadingMiniMap';
+import { trackGenerationEmitter } from '@/lib/trackGenerationEmitter';
 
 interface StyledLoadingScreenProps {
   isVisible: boolean;
+  center?: { lat: number; lng: number };
+  onLoadingComplete?: () => void;
 }
 
-const StyledLoadingScreen: React.FC<StyledLoadingScreenProps> = ({ isVisible }) => {
+const StyledLoadingScreen: React.FC<StyledLoadingScreenProps> = ({ isVisible, center, onLoadingComplete }) => {
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [showExpandedMap, setShowExpandedMap] = useState(false);
+
+  // Escuchar cuando se complete la generación
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const unsubscribe = trackGenerationEmitter.addListener((data) => {
+      if (data.progress >= 100 && !isCompleted) {
+        setIsCompleted(true);
+        // Mostrar el mapa expandido
+        setTimeout(() => {
+          setShowExpandedMap(true);
+        }, 500);
+        
+        // Después de 4 segundos, llamar onLoadingComplete
+        setTimeout(() => {
+          if (onLoadingComplete) {
+            onLoadingComplete();
+          }
+        }, 4500);
+      }
+    });
+
+    return unsubscribe;
+  }, [isVisible, isCompleted, onLoadingComplete]);
+
   if (!isVisible) return null;
 
   return (
@@ -118,10 +149,36 @@ const StyledLoadingScreen: React.FC<StyledLoadingScreenProps> = ({ isVisible }) 
         </div>
       </div>
       
-      {/* Contenido central */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="w-full max-w-3xl">
-          <ConsoleBanner isVisible={true} />
+      {/* Contenido central en dos columnas */}
+      <div className="absolute inset-0 flex items-center justify-center pt-20 pb-20">
+        <div className={`w-full h-full flex gap-6 transition-all duration-1000 ${
+          showExpandedMap ? 'max-w-none' : 'max-w-6xl'
+        }`}>
+          {/* Columna izquierda - Mini mapa cuadrado */}
+          <div className={`flex items-center justify-center transition-all duration-1000 ${
+            showExpandedMap ? 'flex-1 w-full' : 'flex-1'
+          }`}>
+            <div className={`transition-all duration-1000 ${
+              showExpandedMap 
+                ? 'w-full h-full max-w-none aspect-auto' 
+                : 'w-full aspect-square max-w-md'
+            }`}>
+              <LoadingMiniMap 
+                isVisible={true} 
+                center={center || { lat: 40.4168, lng: -3.7038 }} 
+                isExpanded={showExpandedMap}
+              />
+            </div>
+          </div>
+          
+          {/* Columna derecha - Console Banner cuadrado */}
+          {!showExpandedMap && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="w-full aspect-square max-w-md">
+                <ConsoleBanner isVisible={true} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

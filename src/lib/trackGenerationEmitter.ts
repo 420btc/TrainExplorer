@@ -2,6 +2,13 @@
 export interface TrackGenerationProgress {
   progress: number; // 0-100
   message: string;
+  trackGenerated?: {
+    id: string;
+    path: { lat: number; lng: number }[];
+    color: string;
+    lineNumber: number;
+  };
+  totalLines?: number;
 }
 
 // Crear un EventEmitter para la generación de vías

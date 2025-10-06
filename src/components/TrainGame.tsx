@@ -2583,7 +2583,11 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
       
       <div className="relative flex-grow">
         {isLoading ? (
-          <StyledLoadingScreen isVisible={isLoading} />
+          <StyledLoadingScreen 
+            isVisible={isLoading} 
+            center={mapCenter}
+            onLoadingComplete={() => setIsLoading(false)}
+          />
         ) : (
           <>
             <div className="absolute inset-0 z-0">
