@@ -12,23 +12,24 @@ const StyledLoadingScreen: React.FC<StyledLoadingScreenProps> = ({ isVisible }) 
 
   return (
     <div className="absolute inset-0 z-50">
-      {/* Fondo con gradiente que simula un paisaje español */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#87CEEB] to-[#F0E68C]">
-        {/* Sol */}
-        <div className="absolute top-[50px] right-[100px] w-[100px] h-[100px] bg-[#FFD700] rounded-full shadow-lg"></div>
-        
-        {/* Montañas */}
-        <div className="absolute bottom-[100px] left-0 right-0">
-          <div className="w-[300px] h-[150px] bg-[#8B4513] rounded-[50%] absolute left-[50px] -top-[75px]"></div>
-          <div className="w-[400px] h-[200px] bg-[#A0522D] rounded-[50%] absolute left-[250px] -top-[100px]"></div>
-          <div className="w-[350px] h-[175px] bg-[#5D9E31] rounded-[50%] absolute right-[100px] -top-[85px]"></div>
-        </div>
+      {/* Fondo con imagen loading.png */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/src/assets/loading.png)' }}
+      >
+        {/* Overlay oscuro para mejorar la legibilidad */}
+        <div className="absolute inset-0 bg-black/40"></div>
         
         {/* Atribución superior */}
-        <div className="absolute top-4 left-0 right-0 flex justify-center">
-          <div className="bg-[#FF5722]/80 text-white px-4 py-1 rounded-full shadow-md backdrop-blur-sm">
-            <p className="text-sm font-medium">Made By Carlos Freire in Málaga ❤️</p>
-          </div>
+        <div className="absolute top-4 left-0 right-0 flex justify-center z-10">
+          <a 
+            href="https://www.carlosfr.es" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-[#FF5722]/80 hover:bg-[#FF5722]/90 text-white px-4 py-1 rounded-full shadow-lg drop-shadow-md backdrop-blur-sm transition-all duration-300 hover:scale-105"
+          >
+            <p className="text-sm font-medium drop-shadow-sm">Made By: www.carlosfr.es</p>
+          </a>
         </div>
         
         {/* Vías de tren en la parte inferior */}
