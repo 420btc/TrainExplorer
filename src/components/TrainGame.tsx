@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import MiniMap from './MiniMap';
 import PassengerNotification from './PassengerNotification';
+import AutoModeEnhancements from './AutoModeEnhancements';
+import AutoModeMinigames from './AutoModeMinigames';
+import AutoModeNarrative from './AutoModeNarrative';
 import { 
   DEFAULT_COORDINATES, 
   DEFAULT_ZOOM,
@@ -162,6 +165,12 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
   
   // Estado para la estación personal
   const [personalStationId, setPersonalStationId] = useState<string | null>(null);
+  
+  // Estados adicionales para la narrativa del modo automático
+  const [currentStation, setCurrentStation] = useState<Station | null>(null);
+  const [visitedStationsSet, setVisitedStationsSet] = useState<Set<string>>(new Set());
+  const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('morning');
+  const [weather, setWeather] = useState<'sunny' | 'cloudy' | 'rainy' | 'foggy'>('sunny');
 
   // Obtener el contexto del juego
   const gameContext = useGame();
@@ -3042,8 +3051,50 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
           </div>
         </div>
       )}
-    </div>
-  );
-};
+
+      {/* Mejoras del modo automático */}
+       <AutoModeEnhancements
+         isAutoModeActive={autoMode}
+         currentTrack={selectedTrack}
+         visitedTracks={visitedTracks}
+         trainSpeed={trainSpeed}
+         onSpeedBoost={() => {
+           // Implementar boost de velocidad temporal
+           const originalSpeed = trainSpeed;
+           setTrainSpeed(Math.min(16, trainSpeed * 2));
+           setTimeout(() => setTrainSpeed(originalSpeed), 10000); // 10 segundos de boost
+           toast.success("¡Boost de velocidad activado por 10 segundos!");
+         }}
+         onMissionComplete={(mission) => {
+           // Manejar completación de misión
+           console.log('Misión completada:', mission);
+         }}
+       />
+
+       {/* Mini-juegos del modo automático */}
+        <AutoModeMinigames
+          isAutoModeActive={autoMode}
+          onGameComplete={(success, reward) => {
+            if (success) {
+              setMoney(prev => prev + reward.money);
+              setPoints(prev => prev + reward.points);
+              setHappiness(prev => Math.min(100, prev + reward.happiness));
+            }
+          }}
+        />
+
+        {/* Narrativa del modo automático */}
+        <AutoModeNarrative
+          isAutoModeActive={autoMode}
+          currentTrack={selectedTrack}
+          currentStation={currentStation}
+          trainSpeed={trainSpeed}
+          timeOfDay={timeOfDay}
+          weather={weather}
+          visitedStations={visitedStationsSet}
+        />
+      </div>
+    );
+  };
 
 export default TrainGame;
