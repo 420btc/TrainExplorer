@@ -78,6 +78,10 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
   // Mapa para contar cuántas veces se ha visitado cada vía
   const [visitCountMap, setVisitCountMap] = useState<Map<string, number>>(new Map());
   
+  // Estado para controlar el cooldown de cambios de dirección
+  const [lastDirectionChange, setLastDirectionChange] = useState<number>(0);
+  const DIRECTION_CHANGE_COOLDOWN = 3000; // 3 segundos de cooldown
+  
   // Estado para el modo de exploración completa (recorrer todas las vías)
   const [exploreAllMode, setExploreAllMode] = useState<boolean>(false);
   
@@ -1239,6 +1243,20 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
         toast.info("El tren ha llegado al inicio de la vía y no hay conexión disponible");
       }
       
+      // Verificar cooldown antes de cambiar dirección
+      const currentTime = Date.now();
+      if (currentTime - lastDirectionChange < DIRECTION_CHANGE_COOLDOWN) {
+        console.log(`Cooldown activo. Esperando ${Math.ceil((DIRECTION_CHANGE_COOLDOWN - (currentTime - lastDirectionChange)) / 1000)} segundos más`);
+        // Si estamos en cooldown, pausar el modo automático temporalmente
+        if (autoMode) {
+          setAutoMode(false);
+          setTimeout(() => {
+            setAutoMode(true);
+          }, DIRECTION_CHANGE_COOLDOWN - (currentTime - lastDirectionChange));
+        }
+        return;
+      }
+      
       // Registrar esta vía como visitada para evitar volver a ella frecuentemente
       if (selectedTrack) {
         // Registrar múltiples veces para penalizarla más en futuras selecciones
@@ -1273,8 +1291,9 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
         }, 2000);
       }
       
-      // Cambiar la dirección del tren
+      // Cambiar la dirección del tren y actualizar el timestamp
       setIsReversed(!isReversed);
+      setLastDirectionChange(currentTime);
       toast.info("Cambiando dirección automáticamente");
       
       // NO resetear la ruta automática para mantener la continuidad
@@ -2533,7 +2552,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
                   variant="ghost"
                   size="icon"
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => searchQuery.trim() && handleSearchSubmit({ preventDefault: () => {} } as any)}
+                  onClick={() => searchQuery.trim() && handleSearchSubmit({ preventDefault: () => {} } as React.KeyboardEvent<HTMLInputElement>)}
                   disabled={isLoading || !searchQuery.trim()}
                 >
                   <MapPin className="h-3 w-3 text-primary" />

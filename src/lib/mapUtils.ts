@@ -36,7 +36,7 @@ const STATIONS_PER_CONNECTION = 2; // Número fijo de estaciones por conexión
 const MIN_STATION_DISTANCE = 0.3; // Aumentado para distribuir mejor las estaciones en vías más largas
 
 // Token de MapBox para geocodificación
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiNDIwYnRjIiwiYSI6ImNtOTN3ejBhdzByNjgycHF6dnVmeHl2ZTUifQ.Utq_q5wN6DHwpkn6rcpZdw';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 // Interfaz simplificada para información de ubicación (solo calle)
 export interface LocationInfo {
@@ -148,7 +148,7 @@ export const reverseGeocode = async (coordinates: Coordinates): Promise<Location
       }
       
       // Limpiar el nombre
-      streetName = streetName.replace(/[0-9\/#-.,]/g, '').trim();
+      streetName = streetName.replace(/[0-9/#-.,]/g, '').trim();
       
       // Extraer la parte significativa del nombre de la calle
       const words = streetName.split(' ');
@@ -946,7 +946,7 @@ export const generateTrackNetwork = async (center: Coordinates): Promise<TrackSe
 };
 
 // Generate stations along the tracks
-export const generateStations = (tracks: TrackSegment[]): any[] => {
+export const generateStations = (tracks: TrackSegment[]): Station[] => {
   if (!tracks.length) return [];
   
   console.log('Generating stations...');
@@ -957,7 +957,7 @@ export const generateStations = (tracks: TrackSegment[]): any[] => {
     return `E${index + 1}`;
   };
   
-  const stations: any[] = [];
+  const stations: Station[] = [];
   const allStationPoints = new Set<string>(); // To avoid duplicate stations
   const stationPositions: Coordinates[] = []; // Para verificar distancias mínimas
   const mainTracks = tracks.filter(track => !track.id.includes('connection'));
@@ -1000,7 +1000,7 @@ export const generateStations = (tracks: TrackSegment[]): any[] => {
       return [];
     }
     
-    const trackStations: any[] = [];
+    const trackStations: Station[] = [];
     const isConnection = track.id.includes('connection');
     
     // Siempre incluir el punto inicial y final
