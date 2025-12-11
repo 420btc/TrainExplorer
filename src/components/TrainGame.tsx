@@ -452,22 +452,38 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     initializeGame(initialCoordinates);
   };
   
+  // Ref para controlar si el juego ya se ha inicializado
+  const isGameInitialized = useRef(false);
+  // Ref para detectar cambios reales en las coordenadas iniciales
+  const prevInitialCoords = useRef(initialCoordinates);
+
   // Inicializar el juego al cargar
   useEffect(() => {
-    initializeGame(initialCoordinates);
-    
-    // Verificar si hay un usuario logueado
-    const user = getCurrentUser();
-    setIsLoggedIn(!!user);
-    
-    // Guardar esta ubicación en el historial
-    const locationName = `Ubicación ${new Date().toLocaleDateString('es-ES')}`;
-    if (user) {
-      // Función para guardar ruta para el usuario actual (implementar en routeUtils)
-      saveRouteToHistory(locationName, initialCoordinates, user.id);
-    } else {
-      // Función para guardar en el historial general (implementar en routeUtils)
-      saveRouteToHistory(locationName, initialCoordinates);
+    // Detectar si las coordenadas han cambiado realmente (comparación profunda de lat/lng)
+    const coordsChanged = 
+      Math.abs(prevInitialCoords.current.lat - initialCoordinates.lat) > 0.0001 || 
+      Math.abs(prevInitialCoords.current.lng - initialCoordinates.lng) > 0.0001;
+      
+    // Solo inicializar si no se ha hecho antes o si las coordenadas han cambiado significativamente
+    if (!isGameInitialized.current || coordsChanged) {
+      console.log("Inicializando juego...", { firstTime: !isGameInitialized.current, coordsChanged });
+      initializeGame(initialCoordinates);
+      isGameInitialized.current = true;
+      prevInitialCoords.current = initialCoordinates;
+      
+      // Verificar si hay un usuario logueado
+      const user = getCurrentUser();
+      setIsLoggedIn(!!user);
+      
+      // Guardar esta ubicación en el historial
+      const locationName = `Ubicación ${new Date().toLocaleDateString('es-ES')}`;
+      if (user) {
+        // Función para guardar ruta para el usuario actual (implementar en routeUtils)
+        saveRouteToHistory(locationName, initialCoordinates, user.id);
+      } else {
+        // Función para guardar en el historial general (implementar en routeUtils)
+        saveRouteToHistory(locationName, initialCoordinates);
+      }
     }
   }, [initializeGame, initialCoordinates]);
   
