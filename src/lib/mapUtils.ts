@@ -1435,4 +1435,50 @@ export const findConnectingTrack = (
   return minDistance < 0.2 ? closestTrack : null;
 };
 
+// Función para encontrar TODAS las vías conectadas (para decisiones inteligentes)
+export const findAllConnectingTracks = (
+  currentTrack: TrackSegment,
+  allTracks: TrackSegment[],
+  isAtEnd: boolean = true
+): ConnectingTrackInfo[] => {
+  if (!allTracks.length || !currentTrack.path.length) return [];
+  
+  const connectionPoint = isAtEnd 
+    ? currentTrack.path[currentTrack.path.length - 1] 
+    : currentTrack.path[0];
+  
+  const connectingTracks: ConnectingTrackInfo[] = [];
+  const MAX_CONNECTION_DISTANCE = 0.2; // 200 metros
+
+  allTracks.forEach(track => {
+    if (track.id === currentTrack.id || !track.path.length) return;
+    
+    const startPoint = track.path[0];
+    const startDistance = calculateDistance(connectionPoint, startPoint);
+    
+    if (startDistance < MAX_CONNECTION_DISTANCE) {
+      connectingTracks.push({
+        trackId: track.id,
+        startIndex: 0,
+        reversed: false,
+        isAtStart: true
+      });
+    }
+
+    const endPoint = track.path[track.path.length - 1];
+    const endDistance = calculateDistance(connectionPoint, endPoint);
+    
+    if (endDistance < MAX_CONNECTION_DISTANCE) {
+      connectingTracks.push({
+        trackId: track.id,
+        startIndex: track.path.length - 1,
+        reversed: true,
+        isAtStart: false
+      });
+    }
+  });
+  
+  return connectingTracks;
+};
+
 // Utilizamos la función calculateDistance exportada anteriormente
