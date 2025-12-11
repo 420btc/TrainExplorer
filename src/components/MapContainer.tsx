@@ -4,7 +4,7 @@ import L from 'leaflet';
 import TrainMarker from './TrainMarker';
 import StationMarker from './StationMarker';
 import { toast } from 'sonner';
-import { Coordinates, TrackSegment } from '@/lib/mapUtils';
+import { Coordinates, TrackSegment, Station } from '@/lib/mapUtils';
 import PassengerSystem, { Passenger } from './PassengerSystem';
 import './TrackEffects.css'; // Importar los estilos para efectos de vías
 import { Dispatch, SetStateAction } from 'react';
@@ -21,15 +21,6 @@ function MapController({ center, zoom }: MapControllerProps) {
     map.setView([center.lat, center.lng], zoom);
   }, [center, zoom, map]);
   return null;
-}
-
-interface Station {
-  id: string;
-  name: string;
-  position: Coordinates;
-  trackId: string;
-  color?: string;
-  canGenerate?: boolean;
 }
 
 interface MapContainerProps {
@@ -65,6 +56,7 @@ interface MapContainerProps {
   personalStationId?: string; // Nueva propiedad para identificar la estación personal
   highlightedTrack?: TrackSegment | null; // Nueva propiedad para la vía resaltada
   autoMode?: boolean; // Nueva propiedad para saber si el tren está en modo automático
+  onStationSelect?: (station: Station) => void;
 }
 
 const MapContainer: React.FC<MapContainerProps> = ({ 
@@ -93,7 +85,8 @@ const MapContainer: React.FC<MapContainerProps> = ({
   canGeneratePassengers = false,
   personalStationId,
   highlightedTrack = null,
-  autoMode = false
+  autoMode = false,
+  onStationSelect
 }) => {
   // Usar useEffect para la depuración en lugar de hacerlo durante el renderizado
   useEffect(() => {
@@ -101,10 +94,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
       console.log('MapContainer - personalStationId:', personalStationId);
       console.log('Estación personal encontrada:', stations.find(s => s.id === personalStationId)?.name);
     }
-  }, [personalStationId, stations]);
-  
-  // Estado para la estación seleccionada
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  }, [personalStationId, stations, activePassengers]);
   
   // Estado para la vía seleccionada y su temporizador
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
@@ -114,7 +104,9 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
   // Handle station click
   const handleStationClick = (station: Station) => {
-    setSelectedStation(station);
+    if (onStationSelect) {
+      onStationSelect(station);
+    }
     toast.info(`Estación: ${station.name}`);
   };
 
@@ -275,21 +267,6 @@ const MapContainer: React.FC<MapContainerProps> = ({
         />
       </LeafletMap>
       
-      {/* Station info popup */}
-      {selectedStation && (
-        <div className="absolute bottom-4 left-4 bg-background border rounded-md p-3 shadow-md max-w-xs">
-          <h3 className="font-medium">{selectedStation.name}</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Línea: {selectedStation.trackId}
-          </p>
-          <button 
-            onClick={() => setSelectedStation(null)}
-            className="absolute top-1 right-1 text-muted-foreground text-xs"
-          >
-            ×
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -638,7 +615,7 @@ const PassengerSystemController: React.FC<PassengerSystemControllerProps> = ({
       // Limpiar todos los timeouts al desmontar
       timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
     };
-  }, [stations, setActivePassengers, gameStarted, canGeneratePassengers, activePassengers.length, difficulty, personalStationId]);
+  }, [stations, setActivePassengers, gameStarted, canGeneratePassengers, activePassengers, difficulty, personalStationId]);
 
   // Efecto adicional para verificar periódicamente si hay suficientes pasajeros
   useEffect(() => {

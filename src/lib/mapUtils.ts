@@ -89,6 +89,7 @@ export interface Station {
   trackId: string;
   color: string;
   type?: 'residential' | 'commercial' | 'tourist' | 'industrial';
+  canGenerate?: boolean;
 }
 
 // Constants

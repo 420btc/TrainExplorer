@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Coordinates, Station } from '@/lib/mapUtils';
+import { Coordinates, Station, calculateDistance } from '@/lib/mapUtils';
 
 // Tipos para el contexto del juego
 export interface Passenger {
@@ -229,17 +229,33 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (passenger) {
       setDeliveredPassengers(prev => [...prev, passenger]);
       
+      // Calcular distancia en km
+      const distance = calculateDistance(passenger.origin.position, passenger.destination.position);
+      
+      // Calcular recompensa basada en distancia
+      // Base: 10€, Variable: 5€ por km
+      const baseReward = 10;
+      const distanceReward = Math.round(distance * 5);
+      const totalReward = baseReward + distanceReward;
+      
       // Aumentar dinero y puntos por entregar un pasajero
-      setMoney(prev => prev + 10);
-      setPoints(prev => prev + 5);
+      setMoney(prev => prev + totalReward);
+      setPoints(prev => prev + Math.floor(totalReward / 2));
       setHappiness(prev => Math.min(100, prev + 5));
+      
+      // Mostrar mensaje con la ganancia
+      addMessage({
+        id: uuidv4(),
+        text: `Pasajero entregado: +${totalReward}€ (${distance.toFixed(1)}km)`,
+        color: 'green'
+      });
     }
   };
 
   // Función para añadir un mensaje
-  const addMessage = (message: GameMessage) => {
+  const addMessage = useCallback((message: GameMessage) => {
     setMessages(prev => [...prev, message]);
-  };
+  }, []);
 
   // Función para eliminar un mensaje
   const removeMessage = (messageId: string) => {
@@ -339,7 +355,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         color: 'green'
       });
     }
-  }, [money, hasUnlocked, stations.length]);
+  }, [money, hasUnlocked, stations.length, addMessage]);
 
   // Efecto para generar deseos cada 3 minutos
   useEffect(() => {
@@ -348,7 +364,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const generateDesire = () => {
       if (stations.length >= 2) {
         // Seleccionar estaciones de origen y destino aleatorias
-        let originIndex = Math.floor(Math.random() * stations.length);
+        const originIndex = Math.floor(Math.random() * stations.length);
         let destinationIndex;
         do {
           destinationIndex = Math.floor(Math.random() * stations.length);
@@ -419,7 +435,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Limpiar el intervalo al desmontar
     return () => clearInterval(desireTimer);
-  }, [desires]);
+  }, [desires, addMessage]);
 
   // Efecto para generar eventos locales cada 5 minutos
   useEffect(() => {
@@ -467,7 +483,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Limpiar el intervalo al desmontar
     return () => clearInterval(eventInterval);
-  }, [stations, trainSpeed]);
+  }, [stations, trainSpeed, addMessage]);
 
   // Efecto para actualizar la duración de los eventos
   useEffect(() => {
@@ -548,7 +564,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       return () => clearTimeout(arrowTimer);
     }
-  }, [gameStarted]);
+  }, [gameStarted, addMessage]);
   
   // Efecto para generar pasajeros progresivamente después de pulsar el botón de inicio
   useEffect(() => {
@@ -790,7 +806,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       clearTimeout(initialDelay);
       timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
     };
-  }, [stations, canGeneratePassengers, events, gameStarted, passengers.length]);
+  }, [stations, canGeneratePassengers, events, gameStarted, passengers, personalStationId, playerLevel, gameStartTime, addMessage]);
 
   // Efecto para gestionar el tiempo de espera de los pasajeros y el límite máximo por estación
   useEffect(() => {

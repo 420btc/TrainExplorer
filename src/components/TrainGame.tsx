@@ -46,6 +46,7 @@ import GameTutorial from './GameTutorial';
 import LevelSelector from './LevelSelector';
 import LevelProgress from './LevelProgress';
 import TrainSeatsModal from './TrainSeatsModal';
+import StationInfoModal from './StationInfoModal';
 import { gameLevels, loadLevelProgress, saveLevelProgress, updateLevelObjectives, getCurrentLevel } from '@/lib/levelSystem';
 
 interface TrainGameProps {
@@ -134,6 +135,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
   const [showLevelSelector, setShowLevelSelector] = useState(false);
   const [gameTime, setGameTime] = useState(0); // Tiempo de juego en segundos
   const [seatsModalVisible, setSeatsModalVisible] = useState(false); // Estado para el modal de asientos
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null); // Estado para la estación seleccionada
   
   // Estados para pasajeros
   const [activePassengers, setActivePassengers] = useState<Passenger[]>([]);
@@ -2335,6 +2337,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
                 personalStationId={personalStationId} // Pasar la estación personal
                 highlightedTrack={highlightedTrack} // Pasar la vía resaltada
                 autoMode={autoMode} // Pasar el estado del modo automático
+                onStationSelect={setSelectedStation}
               />
             </div>
             
@@ -2751,6 +2754,15 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
           weather={weather}
           visitedStations={visitedStationsSet}
         />
+        
+        {/* Modal de información de estación */}
+        {selectedStation && (
+          <StationInfoModal 
+            station={selectedStation} 
+            passengers={activePassengers}
+            onClose={() => setSelectedStation(null)}
+          />
+        )}
       </div>
     );
   };
