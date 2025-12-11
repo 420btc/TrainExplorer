@@ -1508,28 +1508,28 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     
     // Calcular el intervalo de tiempo basado en la velocidad
     // Calcular intervalo basado en multiplicadores de velocidad específicos
-    // x1 = 500ms, x2 = 100ms, x4 = 80ms, x8 = 50ms, x16 = 10ms
+    // x1 = 300ms, x2 = 80ms, x4 = 40ms, x8 = 20ms, x16 = 5ms (AUMENTADO SIGNIFICATIVAMENTE)
     const speedMultiplier = getSpeedMultiplier(trainSpeed);
     let interval;
     
     switch (speedMultiplier) {
       case 1:
-        interval = 500;
+        interval = 300; // Antes 500
         break;
       case 2:
-        interval = 100;
+        interval = 80; // Antes 100
         break;
       case 4:
-        interval = 80;
+        interval = 40; // Antes 80
         break;
       case 8:
-        interval = 50;
+        interval = 20; // Antes 50
         break;
       case 16:
-        interval = 10;
+        interval = 5; // Antes 10
         break;
       default:
-        interval = 500; // Fallback a x1
+        interval = 300; // Fallback a x1
     }
     
     // Si estamos en modo extremo, hacer el tren 50% más rápido
