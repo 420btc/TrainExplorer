@@ -1432,8 +1432,8 @@ export const findConnectingTrack = (
     }
   });
   
-  // Solo conectar si la distancia es razonable (menos de 200 metros)
-  return minDistance < 0.2 ? closestTrack : null;
+  // Solo conectar si la distancia es razonable (menos de 500 metros)
+  return minDistance < 0.5 ? closestTrack : null;
 };
 
 // Función para encontrar TODAS las vías conectadas (para decisiones inteligentes)
@@ -1449,7 +1449,7 @@ export const findAllConnectingTracks = (
     : currentTrack.path[0];
   
   const connectingTracks: ConnectingTrackInfo[] = [];
-  const MAX_CONNECTION_DISTANCE = 0.2; // 200 metros
+  const MAX_CONNECTION_DISTANCE = 0.5; // 500 metros
 
   allTracks.forEach(track => {
     if (track.id === currentTrack.id || !track.path.length) return;

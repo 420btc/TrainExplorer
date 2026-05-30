@@ -723,19 +723,23 @@ const PassengerSystemController: React.FC<PassengerSystemControllerProps> = ({
   }, [gameStarted, canGeneratePassengers, activePassengers, stations, difficulty, personalStationId, setActivePassengers]);
   
   // Manejar recogida, entrega y expiración de pasajeros
+  // Usamos un intervalo para verificar constantemente (incluso cuando el tren está en movimiento)
   useEffect(() => {
     const checkPassengerInteractions = () => {
       const currentTime = Date.now();
       
+      // Radio de detección en metros - debe ser lo suficientemente grande
+      // para cubrir el salto entre puntos consecutivos de la vía
+      const PICKUP_RADIUS_METERS = 150;
+      
       setActivePassengers(prevPassengers => {
         return prevPassengers.filter(passenger => {
-          // Omitir pasajeros ya recogidos
           if (passenger.isPickedUp) return true;
           
           // Verificar si el pasajero ha expirado (90 segundos)
           if (currentTime - passenger.createdAt > 90000) {
-            onPassengerExpired(passenger);
-            return false; // Eliminar del array
+            if (onPassengerExpired) onPassengerExpired(passenger);
+            return false;
           }
           
           // Verificar si el tren está lo suficientemente cerca para recoger al pasajero
@@ -746,12 +750,12 @@ const PassengerSystemController: React.FC<PassengerSystemControllerProps> = ({
             passenger.position.lng
           );
           
-          if (distance <= 10) {
-            onPassengerPickup(passenger);
-            return false; // Eliminar del array activo
+          if (distance <= PICKUP_RADIUS_METERS) {
+            if (onPassengerPickup) onPassengerPickup(passenger);
+            return false;
           }
           
-          return true; // Mantener en el array
+          return true;
         });
       });
       
@@ -765,18 +769,15 @@ const PassengerSystemController: React.FC<PassengerSystemControllerProps> = ({
           destinationPos.lng
         );
         
-        if (distance <= 10) {
-          // Pasajero entregado
-          onPassengerDelivery(passenger);
+        if (distance <= PICKUP_RADIUS_METERS) {
+          if (onPassengerDelivery) onPassengerDelivery(passenger);
         }
       });
     };
     
-    // Solo verificar interacciones cuando el tren no está en movimiento
-    if (!isTrainMoving) {
-      checkPassengerInteractions();
-    }
-  }, [trainPosition, isTrainMoving, onPassengerPickup, onPassengerDelivery, onPassengerExpired, pickedUpPassengers, setActivePassengers]);
+    const interval = setInterval(checkPassengerInteractions, 500);
+    return () => clearInterval(interval);
+  }, [trainPosition, onPassengerPickup, onPassengerDelivery, onPassengerExpired, pickedUpPassengers, setActivePassengers]);
 
   // Renderizar pasajeros en canvas
   useEffect(() => {
