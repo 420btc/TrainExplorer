@@ -2099,17 +2099,17 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
     <div className="flex flex-col h-screen">
       {/* Panel superior izquierdo con menú */}
       <div className="absolute top-4 left-4 z-50">
-        <div className="bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-lg border border-primary/20 flex items-center gap-2">
+        <div className="bg-slate-900/75 backdrop-blur-xl px-3 py-2 rounded-2xl shadow-2xl shadow-black/30 border border-white/10 ring-1 ring-white/5 flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Menu className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white/10 transition-colors">
+                <Menu className="h-4 w-4 text-slate-300" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <div className="py-4">
-                <h2 className="text-lg font-medium">Metro Español</h2>
-                <p className="text-sm text-muted-foreground">Explorador de redes ferroviarias</p>
+                <h2 className="text-lg font-bold text-white">Metro Español</h2>
+                <p className="text-sm text-slate-400">Explorador de redes ferroviarias</p>
                 
                 <div className="mt-6 space-y-4">
                   <Button 
@@ -2132,7 +2132,6 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
                     className="w-full justify-start" 
                     variant="ghost"
                     onClick={() => {
-                      // Solo mostrar tutorial si no estamos en modo búsqueda
                       if (!isSearchMode.current) {
                         setShowTutorial(true);
                       }
@@ -2165,25 +2164,27 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
             </SheetContent>
           </Sheet>
           
-          <div className="flex items-center">
-            <Train className="h-4 w-4 text-primary mr-1" />
-            <h1 className="text-sm font-bold">Train Maps</h1>
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-500/20 rounded-lg p-1">
+              <Train className="h-4 w-4 text-blue-400" />
+            </div>
+            <h1 className="text-sm font-bold text-white tracking-tight">Train Maps</h1>
           </div>
         </div>
       </div>
 
       {/* Panel de control unificado en la esquina superior derecha */}
-      <div className="absolute top-4 right-4 z-50 max-w-xs">
-        <div className="bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-lg border border-primary/20">
-          <div className="flex flex-col gap-2">
-            {/* Barra de búsqueda integrada */}
-            <div className="flex gap-1 items-center">
+      <div className="absolute top-4 right-4 z-50">
+        <div className="bg-slate-900/75 backdrop-blur-xl p-3 rounded-2xl shadow-2xl shadow-black/30 border border-white/10 ring-1 ring-white/5 w-[340px]">
+          <div className="flex flex-col gap-3">
+            {/* Barra de búsqueda */}
+            <div className="flex gap-1.5 items-center">
               <div className="relative flex-grow">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 h-3.5 w-3.5" />
                 <Input
                   type="text"
                   placeholder="Buscar ubicación..."
-                  className="pl-8 pr-10 h-8 text-sm"
+                  className="pl-9 pr-9 h-9 text-sm bg-slate-800/50 border-slate-700/50 rounded-xl text-white placeholder:text-slate-500 focus-visible:ring-blue-500/30"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
@@ -2193,17 +2194,17 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg hover:bg-slate-700/50"
                   onClick={() => searchQuery.trim() && handleSearchSubmit({ preventDefault: () => {} } as React.KeyboardEvent<HTMLInputElement>)}
                   disabled={isLoading || !searchQuery.trim()}
                 >
-                  <MapPin className="h-3 w-3 text-primary" />
+                  <MapPin className="h-3.5 w-3.5 text-blue-400" />
                 </Button>
               </div>
               <Button 
                 variant="default" 
                 size="icon" 
-                className="h-8 w-8 bg-blue-500 hover:bg-blue-600 text-white flex-shrink-0"
+                className="h-9 w-9 rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex-shrink-0 shadow-lg shadow-blue-600/25"
                 onClick={handleGetCurrentLocation}
                 disabled={isLoading}
                 title="Usar mi ubicación actual"
@@ -2212,7 +2213,7 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
               </Button>
             </div>
             
-            {/* Fila inferior: Control de velocidad */}
+            {/* Control de velocidad */}
             <div className="px-1">
               <GameHeader 
                 speed={trainSpeed} 
@@ -2268,21 +2269,21 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
               <TrackLegend tracks={tracks} stations={stations} />
             </div>
             
-            {/* Panel de control superpuesto (más alargado y mitad de altura) */}
-            <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-              <div className="bg-background/85 backdrop-blur-md p-4 rounded-xl shadow-xl border border-primary/30 w-full max-w-[1080px] mx-4 pointer-events-auto">
-                <div className="flex flex-row items-center gap-6 justify-between h-[100px]">
-                  {/* Sección 1: Información de pasajeros integrada con botones de control */}
-                  <div className="flex items-center gap-2">
+            {/* Panel de control superpuesto */}
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
+              <div className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-3xl shadow-2xl shadow-black/40 border border-white/10 ring-1 ring-white/5 w-full max-w-[1120px] mx-6 pointer-events-auto">
+                <div className="flex flex-row items-center gap-8 justify-between">
+                  {/* Sección 1: Información de pasajeros + botones */}
+                  <div className="flex items-center gap-5">
                     <PassengerInfo 
                       money={money}
                       points={points}
                       activePassengers={activePassengers}
                       pickedUpPassengers={pickedUpPassengers}
                     />
-                    <div className="flex items-center gap-2 ml-3">
-                      {/* Botón dorado de inicio */}
-                      <div className="mr-2 relative">
+                    <div className="h-12 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
                         <GameStartButton 
                           onStart={() => {
                             setGameStarted(true);
@@ -2292,160 +2293,143 @@ const TrainGame: React.FC<TrainGameProps> = ({ initialCoordinates = DEFAULT_COOR
                           showArrow={showStartArrow} 
                         />
                       </div>
-                      
-                      <div className="h-7 w-[1px] bg-border mx-1" />
-                      
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-muted-foreground mb-1">Dificultad:</span>
+
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Dificultad</span>
                         <div className="flex gap-1">
-                          <Button 
+                          <button
                             onClick={() => setDifficulty('easy')}
-                            variant={difficulty === 'easy' ? "default" : "outline"}
-                            size="sm"
-                            className={`h-5 text-[10px] px-2 font-medium ${difficulty === 'easy' ? 'bg-green-600 hover:bg-green-700 shadow-md' : 'border-green-500/50'}`}
+                            className={`h-7 text-[11px] px-3 rounded-lg font-semibold transition-all duration-200 ${
+                              difficulty === 'easy' 
+                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' 
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700/50'
+                            }`}
                           >
                             Fácil
-                          </Button>
-                          <Button 
+                          </button>
+                          <button
                             onClick={() => setDifficulty('medium')}
-                            variant={difficulty === 'medium' ? "default" : "outline"}
-                            size="sm"
-                            className={`h-5 text-[10px] px-2 font-medium ${difficulty === 'medium' ? 'bg-amber-600 hover:bg-amber-700 shadow-md' : 'border-amber-500/50'}`}
+                            className={`h-7 text-[11px] px-3 rounded-lg font-semibold transition-all duration-200 ${
+                              difficulty === 'medium' 
+                                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30' 
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700/50'
+                            }`}
                           >
                             Medio
-                          </Button>
-                          <Button 
+                          </button>
+                          <button
                             onClick={() => setDifficulty('hard')}
-                            variant={difficulty === 'hard' ? "default" : "outline"}
-                            size="sm"
-                            className={`h-5 text-[10px] px-2 font-medium ${difficulty === 'hard' ? 'bg-red-600 hover:bg-red-700 shadow-md' : 'border-red-500/50'}`}
+                            className={`h-7 text-[11px] px-3 rounded-lg font-semibold transition-all duration-200 ${
+                              difficulty === 'hard' 
+                                ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' 
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700/50'
+                            }`}
                           >
                             Difícil
-                          </Button>
+                          </button>
                         </div>
                       </div>
-                      
-                      <div className="h-7 w-[1px] bg-border mx-1" />
-                      
-                      <Button
+
+                      <button
                         onClick={() => setSeatsModalVisible(true)}
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-[11px] px-2 border-blue-500/60 flex items-center justify-center hover:bg-blue-500/10 transition-colors"
+                        className="h-10 px-3 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center gap-2 hover:bg-slate-700/80 transition-colors"
                         title="Ver asientos del tren"
                       >
-                        <Train className="h-3.5 w-3.5 mr-1" />
-                        {pickedUpPassengers.length}/{trainCapacity}
-                      </Button>
+                        <Train className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-bold text-white tabular-nums">{pickedUpPassengers.length}</span>
+                        <span className="text-slate-600">/</span>
+                        <span className="text-sm text-slate-400 tabular-nums">{trainCapacity}</span>
+                      </button>
                     </div>
                   </div>
                   
-                  {/* Separador vertical */}
-                  <div className="h-[80px] w-[2px] bg-gradient-to-b from-gray-200/30 via-gray-300/70 to-gray-200/30 rounded-full"></div>
+                  <div className="h-14 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
                   
-                  {/* Sección 2: Control de Tren (ahora en el centro) */}
-                  <div className="flex-shrink-0 w-[320px] flex flex-col">
+                  {/* Sección 2: Control de Tren */}
+                  <div className="flex flex-col w-[340px]">
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-semibold text-primary">Control de Tren</h3>
-                      <div className="text-xs text-muted-foreground bg-background/70 px-2 py-1 rounded-md border border-border/50">
-                        {selectedTrack ? `Vía: ${selectedTrack.id}` : 'Selecciona vía'}
+                      <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Control</h3>
+                      <div className="text-[10px] font-mono text-slate-500 bg-slate-800/60 px-2 py-0.5 rounded-md border border-slate-700/40">
+                        {selectedTrack ? selectedTrack.id.toUpperCase() : 'Sin vía'}
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-col bg-background/80 p-2 rounded-md border border-border/50 shadow-sm">
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={handleMoveTrainClick}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1 text-sm py-1 h-9"
-                          size="sm"
-                          disabled={autoMode}
-                        >
-                          <Train className="h-4 w-4 mr-1" />
-                          Mover
-                        </Button>
-                        <Button 
-                          onClick={() => {
-                            // Solo cambiar la dirección sin mover el tren
-                            setIsReversed(!isReversed);
-                            toast.info(`Dirección cambiada: ${!isReversed ? 'marcha atrás' : 'adelante'}`);
-                          }}
-                          className={`${isReversed ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-500 hover:bg-blue-600'} text-white flex-1 text-sm py-1 h-9`}
-                          size="sm"
-                          disabled={autoMode}
-                          title={isReversed ? "Dirección: Marcha atrás" : "Dirección: Adelante"}
-                        >
-                          {isReversed ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                              <path d="M18 15h-6v4l-7-7 7-7v4h8a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2z"/>
-                            </svg>
-                          ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                              <path d="M6 15h6v4l7-7-7-7v4H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2z"/>
-                            </svg>
-                          )}
-                          {isReversed ? 'Reversa' : 'Avance'}
-                        </Button>
-                        <Button 
-                          onClick={toggleAutoMode}
-                          className={`${autoMode ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700'} text-white flex-1 text-sm py-1 h-9`}
-                          size="sm"
-                        >
-                          <Train className="h-4 w-4 mr-1" />
-                          {autoMode ? 'Detener' : 'Auto'}
-                        </Button>
-                      </div>
-                      {autoMode && (
-                        <Button 
-                          onClick={() => setExploreAllMode(!exploreAllMode)}
-                          className={`${exploreAllMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-500 hover:bg-gray-600'} text-white w-full text-xs py-1 h-7 mt-1 rounded-md flex items-center justify-center`}
-                          size="sm"
-                        >
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span className="font-medium">
-                            {exploreAllMode ? 'Exploración Activa' : 'Explorar Todo el Mapa'}
-                          </span>
-                          {exploreAllMode && (
-                            <span className="ml-1 bg-green-500 rounded-full h-2 w-2 animate-pulse"></span>
-                          )}
-                        </Button>
-                      )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleMoveTrainClick}
+                        disabled={autoMode}
+                        className="flex-1 h-10 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-95"
+                      >
+                        <Train className="h-4 w-4" />
+                        Mover
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsReversed(!isReversed);
+                          toast.info(`Dirección: ${!isReversed ? 'marcha atrás' : 'adelante'}`);
+                        }}
+                        disabled={autoMode}
+                        className={`h-10 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg ${
+                          isReversed 
+                            ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/25' 
+                            : 'bg-slate-700 hover:bg-slate-600 text-slate-200 shadow-slate-900/30'
+                        }`}
+                      >
+                        {isReversed ? '⟲' : '⟳'}
+                        {isReversed ? 'Rev' : 'Avc'}
+                      </button>
+                      <button
+                        onClick={toggleAutoMode}
+                        className={`h-10 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 shadow-lg ${
+                          autoMode 
+                            ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-amber-500/30' 
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/25'
+                        }`}
+                      >
+                        <span className="text-base">{autoMode ? '■' : '▶'}</span>
+                        {autoMode ? 'Parar' : 'Auto'}
+                      </button>
                     </div>
+                    {autoMode && (
+                      <button
+                        onClick={() => setExploreAllMode(!exploreAllMode)}
+                        className={`mt-2 w-full h-8 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition-all duration-200 ${
+                          exploreAllMode 
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' 
+                            : 'bg-slate-800 text-slate-400 border border-slate-700/50 hover:bg-slate-700'
+                        }`}
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        {exploreAllMode ? 'Exploración Activa' : 'Explorar Todo el Mapa'}
+                        {exploreAllMode && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                      </button>
+                    )}
                   </div>
                   
-                  {/* Separador vertical */}
-                  <div className="h-[80px] w-[2px] bg-gradient-to-b from-gray-200/30 via-gray-300/70 to-gray-200/30 rounded-full"></div>
+                  <div className="h-14 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
                   
-                  {/* Sección 3: Botones de visualización */}
-                  <div className="flex-shrink-0 w-[120px] flex flex-col gap-2 justify-center">
-                    <Button
+                  {/* Sección 3: Botones de herramientas */}
+                  <div className="flex flex-col gap-2">
+                    <button
                       onClick={() => setShowMiniMap(true)}
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-[11px] px-2 border-blue-500/60 flex items-center justify-center hover:bg-blue-500/10 transition-colors"
-                      title="Ver minimapa"
+                      className="h-9 w-[110px] rounded-xl bg-slate-800/80 border border-slate-700/50 text-slate-300 font-medium text-xs flex items-center justify-center gap-2 hover:bg-slate-700/80 transition-all duration-200"
                     >
-                      <MapPin className="h-3.5 w-3.5 mr-1" />
+                      <MapPin className="h-3.5 w-3.5 text-blue-400" />
                       Mapa
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => setShowPassengersList(true)}
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-[11px] px-2 border-blue-500/60 flex items-center justify-center hover:bg-blue-500/10 transition-colors"
-                      title="Ver lista de pasajeros"
+                      className="h-9 w-[110px] rounded-xl bg-slate-800/80 border border-slate-700/50 text-slate-300 font-medium text-xs flex items-center justify-center gap-2 hover:bg-slate-700/80 transition-all duration-200"
                     >
-                      <Users className="h-3.5 w-3.5 mr-1" />
+                      <Users className="h-3.5 w-3.5 text-purple-400" />
                       Pasajeros
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => setMapStyle(mapStyle === 'street' ? 'satellite' : 'street')}
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-[11px] px-2 border-blue-500/60 flex items-center justify-center hover:bg-blue-500/10 transition-colors"
-                      title="Cambiar vista del mapa"
+                      className="h-9 w-[110px] rounded-xl bg-slate-800/80 border border-slate-700/50 text-slate-300 font-medium text-xs flex items-center justify-center gap-2 hover:bg-slate-700/80 transition-all duration-200"
                     >
-                      <MapPin className="h-3.5 w-3.5 mr-1" />
+                      <MapPin className="h-3.5 w-3.5 text-amber-400" />
                       {mapStyle === 'street' ? 'Satélite' : 'Calles'}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>
